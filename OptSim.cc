@@ -1,10 +1,10 @@
-/******************************/
-/*                            */
-/*  Simple optical simulator  */
-/*                            */
-/*  Author: Tatsuya Kikawa    */
-/*                            */
-/******************************/
+/*****************************/
+/*                           */
+/*  Quick optical simulator  */
+/*                           */
+/*  Author: Tatsuya Kikawa   */
+/*                           */
+/*****************************/
 
 #include <iostream>
 #include <iomanip>

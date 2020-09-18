@@ -101,7 +101,7 @@ Optical photon source can be defined using 3D CAD files or manual parameter rang
 
 Input for the simulation is a text file written in the prescribed format.
 Line after # is commented out.
-input.card is an example of the format with explanations.
+[input.card](https://github.com/tkikawa/optsim/blob/master/input.card) is an example of the format with explanations.
 There are four categories.
 
 ### Global
@@ -116,6 +116,7 @@ Material geometry information. Material ID, location of the CAD-file and materia
 - **diffuser**: When the optical photon reaches the surface the material, it is diffusely reflected.
 - **absorber**: When the optical photon reaches the surface the material, it is absorbed.
 - **detector**: When the optical photon reaches the surface the material, it is absorbed. The behavior in the simulation is the same as absorber but is tagged as detected in the output ROOT file.
+![Material of overlapped region](figures/overlap.png)
 
 ### Source
 Initial positional distribution of the generated optical photons.
@@ -157,9 +158,11 @@ The output ROOT files have a TTree *tree and branches shown below.
 Initial position and direction of the optical photon are determined based on [Source] and [Direction] of input card file.
 Intersection of the track and boundary of the material is obtained.
 The intersection is regarded as the new position. The new direction is determined based on the boundary condition.
-- **Medium to medium**: Optical photon is reflected or transmit with refraction in the boundary following the Fresnel equations.
-- **Medium to mirror**: Optical photon is specularly reflected in the boundary.
-- **Medium to diffuser**: Optical photon is diffusely reflected in the boundary following the Lambert's cosine law.
-- **Medium to absorber or detector**: Optical photon is absorbed in the boundary.
+- **To medium**: Optical photon is reflected or transmit with refraction in the boundary following the Fresnel equations.
+- **To mirror**: Optical photon is specularly reflected in the boundary.
+- **To diffuser**: Optical photon is diffusely reflected in the boundary following the Lambert's cosine law.
+- **To absorber or detector**: Optical photon is absorbed in the boundary.
+
+![Behavior of optical photon in the boundary](figures/boundary.png)
 
 This process is repeated until the optical photon is absorbed or go out of the world volume.

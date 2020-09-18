@@ -38,7 +38,24 @@ void Simulator::Run()
   tree->Branch("npas",&npas,"npas/I");
   for(int j=0;j<5;j++)count[j]=0;
   std::cout<<"Generate "<<nevt<<" optical photons."<<std::endl;
+  bool progbar=false;
+  if(nevt>=100&&!displaymode)progbar=true;
+  if(progbar){
+    std::cout<<"0%       25%       50%       75%       100%"<<std::endl;
+    std::cout<<"+---------+---------+---------+---------+"<<std::endl;;
+  }
+  double ndev40=nevt/40;
+  int nprog=0;
   for(int i=0;i<nevt;i++){
+    if(progbar){
+      if(i>=nprog*ndev40){
+	std::cout<<"#"<<std::flush;
+	nprog++;
+      }
+      else if(i==nevt-1){
+	std::cout<<"#"<<std::endl;
+      }
+    }
     src->Generate(pos, vec);//Determine the initial position and direction
     mn=PointMaterial(pos);  //Check the material of initial position
     if(mn!=-1){//Initial position is in the defined material.
