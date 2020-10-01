@@ -111,11 +111,12 @@ Global information for the simulation.
 
 ### Material
 Material geometry information. Material ID, location of the CAD-file and material type must be specified. When the geometries of two materials overlaps, the material with small ID stands in the overlapped region. The available material types are as follows.
-- **medium**: Normal medium in which optical photon transmits. Refractive index and attenuation length (mm) for the absorption in the medium must be specified. The absorption can be inactivated by giving 0 for the attenuation length.
+- **medium**: Normal medium in which the optical photon transmits. Refractive index and attenuation length (mm) for the absorption in the medium must be specified. The absorption can be inactivated by giving 0 for the attenuation length.
+- **converter**: The behavior is the same as medium except that the optical photon is isotropically scattered when it enters this material. Response of wavelength converter (shifter) can be reproduced with this material type.
 - **mirror**: When the optical photon reaches the surface the material, it is specularly reflected.
 - **diffuser**: When the optical photon reaches the surface the material, it is diffusely reflected.
 - **absorber**: When the optical photon reaches the surface the material, it is absorbed.
-- **detector**: When the optical photon reaches the surface the material, it is absorbed. The behavior in the simulation is the same as absorber but is tagged as detected in the output ROOT file.
+- **detector**: The behavior in the simulation is the same as absorber but is tagged as detected in the output ROOT file.
 ![Material of overlapped region](figures/overlap.png)
 
 ### Source
