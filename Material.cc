@@ -35,7 +35,10 @@ Material::Material(std::mt19937 MT, int ID, std::string MATFILE, std::string TYP
   LoadCAD(MATFILE);
   
   std::cout<<"Material ID="<<ID<<", File="<<MATFILE<<", Type="<<TYPE;
-  if(type==0)std::cout<<" (Index="<<INDEX<<", Att.length="<<ATTLEN<<"mm)";
+  if(type==0){
+    if(ATTLEN>0)std::cout<<" (Index="<<INDEX<<", Att.length="<<ATTLEN<<"mm)";
+    else std::cout<<" (Index="<<INDEX<<", no attenuation)";
+  }
   std::cout<<" was added."<<std::endl;
 }
 Material::~Material()

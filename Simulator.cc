@@ -91,7 +91,7 @@ void Simulator::Run()
 	  if(mat[m].GetTriangle(t).Collision(pos,cross,cand)){
 	    for(int j=0;j<3;j++){
 	      newpos[j]=cand[j];
-	      if(matid!=0){
+	      if(matid==0){
 		cross[j]=cand[j];
 	      }
 	      else if(matid==mat[m].ID()){
@@ -160,8 +160,9 @@ void Simulator::Run()
 	  Lambert(vec,newvec,normal);//Diffusion following the Lambert's cosine law
 	  nref++;
 	}
+	Normalize(newvec);
 	for(int j=0;j<3;j++){
-	  pos[j]=newpos[j]+newvec[j]*micro;
+	  pos[j]=newpos[j]+newvec[j]*nano;
 	  vec[j]=newvec[j];
 	}
       }
@@ -368,4 +369,10 @@ void Simulator::Track(double p0[3],double p1[3]){
 void Simulator::Compare(double &A_max, double &A_min, double A){
   if(A_min > A) A_min = A;
   if(A_max < A) A_max = A;
+}
+void Simulator::Normalize(double *v){
+  double norm=sqrt(v[0]*v[0]+v[1]*v[1]+v[2]*v[2]);
+  for(int i=0;i<3;i++){
+    v[i]/=norm;
+  }
 }

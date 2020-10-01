@@ -4,8 +4,8 @@ Quick optical simulator
 This is a Monte Carlo simulation code for behavior of optical photons.
 Advantages of this simulator are
 - Simulation condition can be changed by editing an input card file without re-compiling the source code.
-- Geometry can be easily imported from various 3D CAD files.
-- Relatively fast simulation because of a simple coding dedicated for the behavior of optical photons and the Mersenne twister pseudorandom number generator.
+- Geometry can be easily imported from various formats of 3D CAD files.
+- Relatively fast simulation because of a simple coding dedicated for the behavior of optical photons and the Mersenne twister pseudorandom number generator. [not yet quantitatively evaluated]
 
 ## 1. External libraries
 
@@ -32,8 +32,8 @@ For the installation, [cmake](http://www.cmake.org/) is used. The cmake version 
 - cmake CMakeLists.txt
 - make
 - Set environment variables as follows.
-export ASSIMP=(path to ASSIMP installation directory)
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${ASSIMP}/lib
+    - export ASSIMP=(path to ASSIMP installation directory)
+    - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${ASSIMP}/lib
 
 ### Installation of ROOT
 - Download the binary file from [ROOT website](https://root.cern.ch/downloading-root) and decompress it.
@@ -106,8 +106,8 @@ There are four categories.
 
 ### Global
 Global information for the simulation.
-- **Number**: Number of generated optical photons to be simulated
-- **Index**: Refractive index of surroundings (air)
+- **Number**: Number of generated optical photons to be simulated. [default: 10000]
+- **Index**: Refractive index of surroundings (air). [default: 1]
 
 ### Material
 Material geometry information. Material ID, location of the CAD-file and material type must be specified. When the geometries of two materials overlaps, the material with small ID stands in the overlapped region. The available material types are as follows.

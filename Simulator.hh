@@ -52,6 +52,7 @@ public:
   void Draw(double vtx[3][3], int type);
   void Track(double p0[3], double p1[3]);
   void Compare(double &A_max, double &A_min, double A);
+  void Normalize(double *v);
 };
 
 #endif
