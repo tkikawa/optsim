@@ -357,8 +357,9 @@ void Simulator::Draw(double vtx[3][3], int type){
   if(type==0)     l->SetLineColor(2);
   else if(type==1)l->SetLineColor(6);
   else if(type==2)l->SetLineColor(8);
-  else if(type==3)l->SetLineColor(7);
-  else if(type==4)l->SetLineColor(4);
+  else if(type==3)l->SetLineColor(5);
+  else if(type==4)l->SetLineColor(7);
+  else if(type==5)l->SetLineColor(4);
   l->Draw();
 }
 void Simulator::Track(double p0[3],double p1[3]){

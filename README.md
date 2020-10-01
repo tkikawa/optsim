@@ -65,8 +65,9 @@ Even when the seed for the generator is not given by users, it is given by a non
 Display mode visualizes the material geometry and tracks of optical photons.
 Meshes constituting the material geometry are displayed in different colors according to the type of the materials.
 - **Red**: normal medium material
-- **Magenta**: mirror material
-- **Green**: diffuser material
+- **Magenta**: converter material
+- **Green**: mirror material
+- **Yellow**: diffuser material
 - **Cyan**: absorber material
 - **Blue**: detector material
 
