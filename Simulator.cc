@@ -139,8 +139,8 @@ void Simulator::Run()
 	  Track(pos,newpos);
 	}
       }
-      if(btype >= -1 && btype <=2){
-	if(btype == -1 || btype == 0){
+      if(btype >= -1 && btype <=3){
+	if(btype <= 1){
 	  if(Fresnel(vec,newvec,normal,index,newindex)){
 	    mn=newmn;
 	    matid=newmatid;
@@ -152,11 +152,11 @@ void Simulator::Run()
 	    nref++;
 	  }
 	}
-	else if(btype == 1){
+	else if(btype == 2){
 	  Specular(vec,newvec,normal);//Specular reflection
 	  nref++;
 	}
-	else if(btype == 2){
+	else if(btype == 3){
 	  Lambert(vec,newvec,normal);//Diffusion following the Lambert's cosine law
 	  nref++;
 	}
@@ -164,6 +164,9 @@ void Simulator::Run()
 	for(int j=0;j<3;j++){
 	  pos[j]=newpos[j]+newvec[j]*nano;
 	  vec[j]=newvec[j];
+	}
+	if(btype == 1){//Isotropic scattering for converter
+	  Isotropic(vec);
 	}
       }
       else break;//Absorbed, detected or go out of world volume.
@@ -207,7 +210,7 @@ void Simulator::Initialize(){
 int Simulator::FType(int bt){
   if(bt==-2)return 1;//Go out of world volume.
   else if(bt==-3)return 2;//Absorbed in normal medium.
-  else return bt;//Absorbed by absorber(ftype=3) or detector(ftype=4).
+  else return bt;//Absorbed by absorber(ftype=4) or detector(ftype=5).
 }
 void Simulator::Summary(){
   std::cout<<"Go out of world volume   : "<<count[1]<<std::endl;
@@ -371,8 +374,15 @@ void Simulator::Compare(double &A_max, double &A_min, double A){
   if(A_max < A) A_max = A;
 }
 void Simulator::Normalize(double *v){
-  double norm=sqrt(v[0]*v[0]+v[1]*v[1]+v[2]*v[2]);
+  double norm=v[0]*v[0]+v[1]*v[1]+v[2]*v[2];
   for(int i=0;i<3;i++){
     v[i]/=norm;
   }
+}
+void Simulator::Isotropic(double *v){
+  v[2]=1-2*unirand(mt);
+  double ang=unirand(mt)*2*pi;
+  double vr=sqrt(1-v[2]*v[2]);
+  v[0]=vr*cos(ang);
+  v[1]=vr*sin(ang);
 }

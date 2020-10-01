@@ -35,8 +35,3 @@ void ReadInFile(const char *inpath, Config &vars){
       std::getline(infile,rest);
   }
 }
-
-void VectNorm(double *vec){
-  double norm=vec[0]*vec[0]+vec[1]*vec[1]+vec[2]*vec[2];
-  for(int i=0;i<3;i++)vec[i]=vec[i]/norm;
-}

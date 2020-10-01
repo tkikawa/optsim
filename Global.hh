@@ -17,6 +17,5 @@ static const double cadunit=1;// Unit of CAD files [1 for mm, 10 for cm, 1000 fo
 typedef std::map<std::string, std::map<std::string, std::string> > Config;
 
 void ReadInFile(const char *inpath, Config &vars);//read variables from input card file into map
-void VectNorm(double *vec);
 
 #endif

@@ -30,6 +30,7 @@ public:
   void PointInSource(double *pos);
   void Direction(double *vec);
   void Compare(double &A_max, double &A_min, double A);
+  void Normalize(double &vx, double &vy, double &xz);
 };
 
 #endif

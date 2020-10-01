@@ -79,6 +79,8 @@ Source::Source(std::mt19937 MT, Config config)
     std::cerr<<"Direction type must be any one of isotropic, flat or gauss."<<std::endl;
     exit(1);
   }
+  
+  Normalize(v_x, v_y, v_z);  
 
   cost=v_z;
   sint=sqrt(1-cost*cost);
@@ -194,4 +196,10 @@ void Source::Direction(double *vec){
 void Source::Compare(double &A_max, double &A_min, double A){
   if(A_min > A) A_min = A;
   if(A_max < A) A_max = A;
+}
+void Source::Normalize(double &vx, double &vy, double &vz){
+  double norm=vx*vx+vy*vy+vz*vz;
+  vx/=norm;
+  vy/=norm;
+  vz/=norm;
 }

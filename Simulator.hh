@@ -53,6 +53,7 @@ public:
   void Track(double p0[3], double p1[3]);
   void Compare(double &A_max, double &A_min, double A);
   void Normalize(double *v);
+  void Isotropic(double *v);
 };
 
 #endif
