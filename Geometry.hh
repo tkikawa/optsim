@@ -17,23 +17,14 @@ class Geometry
 public:
   Geometry();
   virtual ~Geometry();
-
-public:
-  std::mt19937 mt;
-  std::uniform_real_distribution<double> unirand;
-  std::normal_distribution<double> gausrand;
-  std::vector<Triangle> triangle;
-
-  /*
-  Assimp::Importer importer;
-  const aiScene* scene;
-  aiMesh* aim;
-  */
-  
   void LoadCAD(std::string name);
   int NTriangle(){return triangle.size();}
   Triangle GetTriangle(int n){return triangle[n];}
   bool InSolid(double pos[3]);
+  std::mt19937 mt;
+  std::vector<Triangle> triangle;
+  std::uniform_real_distribution<double> unirand;
+  std::normal_distribution<double> gausrand;
 };
 
 #endif

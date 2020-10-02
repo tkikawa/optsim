@@ -62,11 +62,13 @@ void Simulator::Run()
       matid=mat[mn].ID();
       index=mat[mn].Index();
       attlen=mat[mn].AttLen();
+      scatlen=mat[mn].ScatLen();
     }
     else{//Initial position is not in the defined materials and is in surrounding material (air).
       matid=0;
       index=index0;
       attlen=0;
+      scatlen=0;
     }
     Initialize();
     while(1){
@@ -81,6 +83,7 @@ void Simulator::Run()
 	    newmatid=mat[m].ID();
 	    newindex=mat[m].Index();
 	    newattlen=mat[m].AttLen();
+	    newscatlen=mat[m].ScatLen();
 	    btype=mat[m].Type();
 	    newmn=m;
 	    goto ENDLOOP;
@@ -106,6 +109,7 @@ void Simulator::Run()
 	      newmatid=0;
 	      newindex=index0;
 	      newattlen=0;
+	      newscatlen=0;
 	      btype=-1;
 	      newmn=-1;
 	    }
@@ -113,6 +117,7 @@ void Simulator::Run()
 	      newmatid=mat[m].ID();
 	      newindex=mat[m].Index();
 	      newattlen=mat[m].AttLen();
+	      newscatlen=mat[m].ScatLen();
 	      btype=mat[m].Type();
 	      newmn=m;
 	    }
@@ -123,11 +128,21 @@ void Simulator::Run()
     ENDLOOP:
       if(btype!=2){
 	pl=sqrt(pow(newpos[0]-pos[0],2)+pow(newpos[1]-pos[1],2)+pow(newpos[2]-pos[2],2));
-	if(attlen>0){//When attlen==0, absorption in the medium does not occur.
-	  apl=-attlen*log(unirand(mt));
-	  if(apl<pl){
-	    pl=apl;
-	    btype=-3;
+	if(attlen>0||scatlen>0){//When attlen==0 (scatlen==0), absorption (scattering) in the medium does not occur.
+	  if(attlen>0)apl=-attlen*log(unirand(mt));
+	  else apl=DBL_MAX;
+	  if(scatlen>0)spl=-scatlen*log(unirand(mt));
+	  else spl=DBL_MAX;
+	  if(apl<pl || spl<pl){
+	    if(apl<spl){//Absorption in the medium
+	      pl=apl;
+	      btype=-3;
+	    }
+	    else{//Scattering in the medium
+	      pl=spl;
+	      btype=4;
+	      Rayleigh(vec,newvec);
+	    }
 	    for(int j=0;j<3;j++){
 	      newpos[j]=pos[j]+vec[j]*pl;
 	    }
@@ -146,6 +161,7 @@ void Simulator::Run()
 	    matid=newmatid;
 	    index=newindex;
 	    attlen=newattlen;
+	    scatlen=newscatlen;
 	    npas++;
 	  }
 	  else{
@@ -186,6 +202,57 @@ void Simulator::Run()
   file->Write();
   file->Close();  
 }
+void Simulator::Display()
+{
+  displaymode=true;
+  double vtx[3][3];
+  TCanvas *c1 = new TCanvas("Event display","Event display",800,800);
+  TView *view = TView::CreateView(1);
+  x_min = y_min = z_min = world;
+  x_max = y_max = z_max = -world;
+  for(unsigned int m=0;m<mat.size();m++){//loop for Materials
+    for(int t=0;t<mat[m].NTriangle();t++){//loop for Triangles
+	for(int j=0;j<3;j++){
+	  vtx[j][0]=mat[m].GetTriangle(t).X(j);
+	  vtx[j][1]=mat[m].GetTriangle(t).Y(j);
+	  vtx[j][2]=mat[m].GetTriangle(t).Z(j);
+	  Compare(x_max, x_min, vtx[j][0]);
+	  Compare(y_max, y_min, vtx[j][1]);
+	  Compare(z_max, z_min, vtx[j][2]);
+	}//end of for
+	Draw(vtx,mat[m].Type());
+    }//end of for
+  }//end of for
+  r_max = (x_max-x_min > y_max-y_min) ? x_max-x_min : y_max-y_min;
+  r_max = (z_max-z_min > r_max) ? z_max-z_min : r_max;
+  view->SetRange((x_max-x_min-r_max)/2, (y_max-y_min-r_max)/2, (z_max-z_min-r_max)/2,
+		 (x_max-x_min+r_max)/2, (y_max-y_min+r_max)/2, (z_max-z_min+r_max)/2);
+
+  c1->Update();
+  std::cout<<"******** Display mode ********"<<std::endl;
+  std::cout<<"Red:    normal medium material"<<std::endl;
+  std::cout<<"Magenta:converter material"<<std::endl;
+  std::cout<<"Yellow: mirror material"<<std::endl;
+  std::cout<<"Green:  diffuser material"<<std::endl;
+  std::cout<<"Cyan:   absorber material"<<std::endl;
+  std::cout<<"Blue:   detector material"<<std::endl;
+  std::string msg;
+  while(1){
+    std::cout<<"Waiting for input."<<std::endl;
+    std::cout<<"\"quit\" or \"exit\": Terminate the display mode."<<std::endl;
+    std::cout<<"Positive integer: Generate photons and display tracks."<<std::endl;
+    std::cin >> msg;
+    if(msg=="quit" || msg=="exit")break;
+    if(std::all_of(msg.cbegin(), msg.cend(), isdigit)){
+      if(stoi(msg)>0){
+	nevt=stoi(msg);
+	Run();
+	c1->Update();
+      }
+    }
+  }
+  c1->Close();
+}
 int Simulator::PointMaterial(double p[3]){
   for(unsigned int m=0;m<mat.size();m++){
     if(mat[m].InSolid(p)){
@@ -210,7 +277,12 @@ void Simulator::Initialize(){
 int Simulator::FType(int bt){
   if(bt==-2)return 1;//Go out of world volume.
   else if(bt==-3)return 2;//Absorbed in normal medium.
-  else return bt;//Absorbed by absorber(ftype=4) or detector(ftype=5).
+  else if(bt==4)return 3;//Absorbed by absorber
+  else if(bt==5)return 4;//Detected by detector
+  else{
+    std::cerr<<"Error in FType"<<std::endl;
+    exit(1);
+  }
 }
 void Simulator::Summary(){
   std::cout<<"Go out of world volume   : "<<count[1]<<std::endl;
@@ -298,55 +370,7 @@ void Simulator::Lambert(double v[3], double *newv, double norm[3]){
   newv[1]=cosp*ranv[0]  +cost*sinp*ranv[1] +sint*sinp*ranv[2];
   newv[2]=              -sint*ranv[1]      +cost*ranv[2];
 }
-void Simulator::Display()
-{
-  displaymode=true;
-  double vtx[3][3];
-  TCanvas *c1 = new TCanvas("Event display","Event display",800,800);
-  TView *view = TView::CreateView(1);
-  x_min = y_min = z_min = world;
-  x_max = y_max = z_max = -world;
-  for(unsigned int m=0;m<mat.size();m++){//loop for Materials
-    for(int t=0;t<mat[m].NTriangle();t++){//loop for Triangles
-	for(int j=0;j<3;j++){
-	  vtx[j][0]=mat[m].GetTriangle(t).X(j);
-	  vtx[j][1]=mat[m].GetTriangle(t).Y(j);
-	  vtx[j][2]=mat[m].GetTriangle(t).Z(j);
-	  Compare(x_max, x_min, vtx[j][0]);
-	  Compare(y_max, y_min, vtx[j][1]);
-	  Compare(z_max, z_min, vtx[j][2]);
-	}//end of for
-	Draw(vtx,mat[m].Type());
-    }//end of for
-  }//end of for
-  r_max = (x_max-x_min > y_max-y_min) ? x_max-x_min : y_max-y_min;
-  r_max = (z_max-z_min > r_max) ? z_max-z_min : r_max;
-  view->SetRange((x_max-x_min-r_max)/2, (y_max-y_min-r_max)/2, (z_max-z_min-r_max)/2,
-		 (x_max-x_min+r_max)/2, (y_max-y_min+r_max)/2, (z_max-z_min+r_max)/2);
-
-  c1->Update();
-  std::cout<<"******** Display mode ********"<<std::endl;
-  std::cout<<"Red:    normal medium material"<<std::endl;
-  std::cout<<"Magenta:mirror material"<<std::endl;
-  std::cout<<"Green:  diffuser material"<<std::endl;
-  std::cout<<"Cyan:   absorber material"<<std::endl;
-  std::cout<<"Blue:   detector material"<<std::endl;
-  std::string msg;
-  while(1){
-    std::cout<<"Waiting for input."<<std::endl;
-    std::cout<<"\"quit\" or \"exit\": Terminate the display mode."<<std::endl;
-    std::cout<<"Positive integer: Generate photons and display tracks."<<std::endl;
-    std::cin >> msg;
-    if(msg=="quit" || msg=="exit")break;
-    if(std::all_of(msg.cbegin(), msg.cend(), isdigit)){
-      if(stoi(msg)>0){
-	nevt=stoi(msg);
-	Run();
-	c1->Update();
-      }
-    }
-  }
-  c1->Close();
+void Simulator::Rayleigh(double v[3], double *newv){
 }
 void Simulator::Draw(double vtx[3][3], int type){
   TPolyLine3D *l = new TPolyLine3D(3);
@@ -356,8 +380,8 @@ void Simulator::Draw(double vtx[3][3], int type){
   l->SetPoint(3,vtx[0][0],vtx[0][1],vtx[0][2]);
   if(type==0)     l->SetLineColor(2);
   else if(type==1)l->SetLineColor(6);
-  else if(type==2)l->SetLineColor(8);
-  else if(type==3)l->SetLineColor(5);
+  else if(type==2)l->SetLineColor(5);
+  else if(type==3)l->SetLineColor(8);
   else if(type==4)l->SetLineColor(7);
   else if(type==5)l->SetLineColor(4);
   l->Draw();

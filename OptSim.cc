@@ -98,19 +98,20 @@ int main(int argc, char *argv[])
   std::cout<<"Loading material data."<<std::endl;
   std::string matfile, type;
   int id;
-  double index, attlen;
+  double index, attlen, scatlen;
   for(std::map<std::string, std::string>::iterator i = config["Material"].begin(); i != config["Material"].end(); i++){
     std::istringstream(i->first) >> id;
     std::istringstream ss(i->second);
     ss >> matfile >> type;
     if(type=="medium"){
-      ss >> index >> attlen;
+      ss >> index >> attlen >> scatlen;
     }
     else{
       index=1;
       attlen=0;
+      scatlen=0;
     }
-    Material *mat = new Material(mt,id, matfile, type, index, attlen);
+    Material *mat = new Material(mt,id, matfile, type, index, attlen, scatlen);
     sim->AddMaterial(mat);
   }
 
