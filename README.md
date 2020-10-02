@@ -47,6 +47,7 @@ For the installation, [cmake](http://www.cmake.org/) is used. The cmake version 
 ### Installation of this optical simulator
 
 - Download the codes from [GitHub](https://github.com/tkikawa/optsim).
+    - git clone https://github.com/tkikawa/optsim.git
 - make
 
 ## 3. Run the simulation
@@ -81,7 +82,7 @@ Input "quit" or "exit" to terminate the display mode.
 ### Material geometry
 
 Material geometry can be imported from [various well-known 3D model formats](https://github.com/assimp/assimp/blob/master/doc/Fileformats.md).
-Importation of [binary STL files](http://en.wikipedia.org/wiki/STL_%28file_format%29) was tested..
+Importation of [binary STL files](http://en.wikipedia.org/wiki/STL_%28file_format%29) was tested.
 STL files use a list of triangles to describe 3D-surfaces. They can be created with most CAD software, e.g. [Inventor](https://www.autodesk.co.jp/products/inventor/overview) or [Solidworks](https://www.solidworks.com/) via "File - Save As..." using the STL file type.
 Note the "Options..." button in the Save dialog, there you can change format (only binary supported), resolution, coordinate system etc.
 

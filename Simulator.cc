@@ -186,9 +186,7 @@ void Simulator::Run()
 	}
       }
       else break;//Absorbed, detected or go out of world volume.
-      
     }//end of while
-
     for(int j=0;j<3;j++){
       fpos[j]=newpos[j];
       fvec[j]=newvec[j];
@@ -371,6 +369,41 @@ void Simulator::Lambert(double v[3], double *newv, double norm[3]){
   newv[2]=              -sint*ranv[1]      +cost*ranv[2];
 }
 void Simulator::Rayleigh(double v[3], double *newv){
+  if(unirand(mt)<2./3.){//Angle-independent term
+    Isotropic(newv);
+  }
+  else{//cos^2(theta)-dependent term
+  double cost,sint,cosp,sinp;
+  double ranv[3],vr,ang;  
+  cost=v[2];
+  sint=sqrt(1-cost*cost);
+  if(sint!=0){
+    cosp=v[0]/sint;
+  }
+  else{
+    cosp=1;
+  }
+  if(v[1]>0){
+    sinp=sqrt(1-cosp*cosp);
+  }
+  else{
+    sinp=-sqrt(1-cosp*cosp);
+  }
+
+  if(unirand(mt)<0.5){
+    ranv[2]=sqrt(sqrt(unirand(mt)));
+  }
+  else{
+    ranv[2]=-sqrt(sqrt(unirand(mt)));
+  }
+  ang=unirand(mt)*2*pi;
+  vr=sqrt(1-ranv[2]*ranv[2]);
+  ranv[0]=vr*cos(ang);
+  ranv[1]=vr*sin(ang);
+  newv[0]=-sinp*ranv[0] +cost*cosp*ranv[1] +sint*cosp*ranv[2];
+  newv[1]=cosp*ranv[0]  +cost*sinp*ranv[1] +sint*sinp*ranv[2];
+  newv[2]=              -sint*ranv[1]      +cost*ranv[2];    
+  }
 }
 void Simulator::Draw(double vtx[3][3], int type){
   TPolyLine3D *l = new TPolyLine3D(3);
