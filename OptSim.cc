@@ -116,8 +116,8 @@ int main(int argc, char *argv[])
   }
 
   std::cout<<"Start simulation."<<std::endl;
-  if(!dmode)sim->Run();//normal run mode
-  else sim->Display();//display mode
+  if(!dmode)sim->Run();//Normal run mode
+  else sim->Display();//Display mode
   
   gettimeofday(&end_time, NULL);
   double time_diff = end_time.tv_sec - start_time.tv_sec + (double)(end_time.tv_usec - start_time.tv_usec)/1e6;

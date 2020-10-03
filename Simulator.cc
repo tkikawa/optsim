@@ -13,16 +13,13 @@ Simulator::Simulator(std::mt19937 MT, Config config, std::string OUTPUT)
 Simulator::~Simulator()
 {
 }
-void Simulator::AddMaterial(Material *MAT)
-{
+void Simulator::AddMaterial(Material *MAT){//Add material to the simulator
   mat.push_back(*MAT);
 }
-void Simulator::SetSource(Source *SRC)
-{
+void Simulator::SetSource(Source *SRC){//Set source in the simulator
   src = SRC;
 }
-void Simulator::Run()
-{
+void Simulator::Run(){//Run simulation
   file = new TFile(output.c_str(), "recreate");
   tree = new TTree("tree","tree");
   tree->Branch("ipos[3]",&ipos,"ipos[3]/D");
@@ -138,7 +135,7 @@ void Simulator::Run()
 	      pl=apl;
 	      btype=-3;
 	    }
-	    else{//Scattering in the medium
+	    else{//Rayleigh scattering in the medium
 	      pl=spl;
 	      btype=4;
 	      Rayleigh(vec,newvec);
@@ -156,7 +153,7 @@ void Simulator::Run()
       }
       if(btype >= -1 && btype <=3){
 	if(btype <= 1){
-	  if(Fresnel(vec,newvec,normal,index,newindex)){
+	  if(Fresnel(vec,newvec,normal,index,newindex)){//Determine if the optical photon is reflected or transmitted with refraction following the Fresnel equation
 	    mn=newmn;
 	    matid=newmatid;
 	    index=newindex;
@@ -200,8 +197,7 @@ void Simulator::Run()
   file->Write();
   file->Close();  
 }
-void Simulator::Display()
-{
+void Simulator::Display(){//Event display mode
   displaymode=true;
   double vtx[3][3];
   TCanvas *c1 = new TCanvas("Event display","Event display",800,800);
@@ -251,7 +247,7 @@ void Simulator::Display()
   }
   c1->Close();
 }
-int Simulator::PointMaterial(double p[3]){
+int Simulator::PointMaterial(double p[3]){//Check the material of initial position
   for(unsigned int m=0;m<mat.size();m++){
     if(mat[m].InSolid(p)){
       return m;
@@ -259,7 +255,7 @@ int Simulator::PointMaterial(double p[3]){
   }
   return -1;
 }
-void Simulator::Initialize(){
+void Simulator::Initialize(){//Initialize the variables.
   for(int j=0;j<3;j++){
     ipos[j]=pos[j];
     ivec[j]=vec[j];
@@ -272,23 +268,23 @@ void Simulator::Initialize(){
   length=0;
   time=0;
 }
-int Simulator::FType(int bt){
-  if(bt==-2)return 1;//Go out of world volume.
+int Simulator::FType(int bt){//Conver the temporary type ID to final type ID
+  if(bt==-2)return 1;     //Go out of world volume.
   else if(bt==-3)return 2;//Absorbed in normal medium.
-  else if(bt==4)return 3;//Absorbed by absorber
-  else if(bt==5)return 4;//Detected by detector
+  else if(bt==4)return 3; //Absorbed by absorber
+  else if(bt==5)return 4; //Detected by detector
   else{
     std::cerr<<"Error in FType"<<std::endl;
     exit(1);
   }
 }
-void Simulator::Summary(){
+void Simulator::Summary(){//Display the summary of simulation
   std::cout<<"Go out of world volume   : "<<count[1]<<std::endl;
   std::cout<<"Absorved in normal medium: "<<count[2]<<std::endl;
   std::cout<<"Absorbed by absorber     : "<<count[3]<<std::endl;
   std::cout<<"Detected by detector     : "<<count[4]<<std::endl;
 }
-bool Simulator::Fresnel(double v[3], double *newv, double norm[3], double idx_in, double idx_out){
+bool Simulator::Fresnel(double v[3], double *newv, double norm[3], double idx_in, double idx_out){//Determine if the optical photon is reflected or transmitted with refraction following the Fresnel equation
   double idx_ratio=idx_out/idx_in;
   double cos_in=v[0]*norm[0]+v[1]*norm[1]+v[2]*norm[2];
   double sin_in=sqrt(1-cos_in*cos_in);
@@ -327,13 +323,13 @@ bool Simulator::Fresnel(double v[3], double *newv, double norm[3], double idx_in
     }
   } 
 }
-void Simulator::Specular(double v[3], double *newv, double norm[3]){
+void Simulator::Specular(double v[3], double *newv, double norm[3]){//Specular reflection
   double cp=v[0]*norm[0]+v[1]*norm[1]+v[2]*norm[2];
   for(int i=0;i<3;i++){
     newv[i]=v[i]-2*norm[i]*cp;
   }
 }
-void Simulator::Lambert(double v[3], double *newv, double norm[3]){
+void Simulator::Lambert(double v[3], double *newv, double norm[3]){//Diffusion following the Lambert's cosine law
   double cp=v[0]*norm[0]+v[1]*norm[1]+v[2]*norm[2];
   if(cp>0){
     for(int i=0;i<3;i++){
@@ -368,7 +364,7 @@ void Simulator::Lambert(double v[3], double *newv, double norm[3]){
   newv[1]=cosp*ranv[0]  +cost*sinp*ranv[1] +sint*sinp*ranv[2];
   newv[2]=              -sint*ranv[1]      +cost*ranv[2];
 }
-void Simulator::Rayleigh(double v[3], double *newv){
+void Simulator::Rayleigh(double v[3], double *newv){//Rayleigh scattering in the medium
   if(unirand(mt)<2./3.){//Angle-independent term
     Isotropic(newv);
   }
@@ -405,7 +401,7 @@ void Simulator::Rayleigh(double v[3], double *newv){
   newv[2]=              -sint*ranv[1]      +cost*ranv[2];    
   }
 }
-void Simulator::Draw(double vtx[3][3], int type){
+void Simulator::Draw(double vtx[3][3], int type){//Draw materials in the event display
   TPolyLine3D *l = new TPolyLine3D(3);
   l->SetPoint(0,vtx[0][0],vtx[0][1],vtx[0][2]);
   l->SetPoint(1,vtx[1][0],vtx[1][1],vtx[1][2]);
@@ -419,7 +415,7 @@ void Simulator::Draw(double vtx[3][3], int type){
   else if(type==5)l->SetLineColor(4);
   l->Draw();
 }
-void Simulator::Track(double p0[3],double p1[3]){
+void Simulator::Track(double p0[3],double p1[3]){//Draw track of optical photon in the event display
   TPolyLine3D *l = new TPolyLine3D(2);
   l->SetPoint(0,p0[0],p0[1],p0[2]);
   l->SetPoint(1,p1[0],p1[1],p1[2]);
@@ -427,17 +423,17 @@ void Simulator::Track(double p0[3],double p1[3]){
   l->SetLineWidth(2);
   l->Draw();
 }
-void Simulator::Compare(double &A_max, double &A_min, double A){
+void Simulator::Compare(double &A_max, double &A_min, double A){//Update the minimum and maximum points of a coordinate
   if(A_min > A) A_min = A;
   if(A_max < A) A_max = A;
 }
-void Simulator::Normalize(double *v){
+void Simulator::Normalize(double *v){//Normalize the vector norm.
   double norm=v[0]*v[0]+v[1]*v[1]+v[2]*v[2];
   for(int i=0;i<3;i++){
     v[i]/=norm;
   }
 }
-void Simulator::Isotropic(double *v){
+void Simulator::Isotropic(double *v){//Rndomely and isotropically determine the direction
   v[2]=1-2*unirand(mt);
   double ang=unirand(mt)*2*pi;
   double vr=sqrt(1-v[2]*v[2]);

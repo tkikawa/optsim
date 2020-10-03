@@ -1,6 +1,6 @@
 #include "Global.hh"
 
-void ReadInFile(const char *inpath, Config &vars){
+void ReadInFile(const char *inpath, Config &vars){//Read out the input card file.
   std::ifstream infile(inpath);
   if(!infile){
     std::cerr<<"Error: Input card file "<<inpath<<" is not found."<<std::endl;

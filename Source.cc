@@ -107,7 +107,7 @@ void Source::Generate(double *pos, double *vec)
   PointInSource(pos);
   Direction(vec);
 }
-void Source::PointInSource(double *pos){
+void Source::PointInSource(double *pos){//Randomely determine a point in the source volume or surface.
   
   double r, phi_r;
 
@@ -175,7 +175,7 @@ void Source::PointInSource(double *pos){
     }
   }
 }
-void Source::Direction(double *vec){
+void Source::Direction(double *vec){//Randomely determine the initial direction of the optical photon.
   if (directionmode == "isotropic" || directionmode == "flat"){
     v[2]=1+unirand(mt)*(rz-1);
   }
@@ -193,11 +193,11 @@ void Source::Direction(double *vec){
   vec[1]=cosp*v[0]  +cost*sinp*v[1] +sint*sinp*v[2];
   vec[2]=           -sint*v[1]      +cost*v[2];
 }
-void Source::Compare(double &A_max, double &A_min, double A){
+void Source::Compare(double &A_max, double &A_min, double A){//Update the minimum and maximum points of a coordinate.
   if(A_min > A) A_min = A;
   if(A_max < A) A_max = A;
 }
-void Source::Normalize(double &vx, double &vy, double &vz){
+void Source::Normalize(double &vx, double &vy, double &vz){//Normalize the vector norm.
   double norm=vx*vx+vy*vy+vz*vz;
   vx/=norm;
   vy/=norm;

@@ -6,7 +6,7 @@ Geometry::Geometry()
 Geometry::~Geometry()
 {
 }
-void Geometry::LoadCAD(std::string name){
+void Geometry::LoadCAD(std::string name){//Read out the input CAD file as a assembly of trianbles
 
   std::ifstream cadfile(name);
   if(cadfile.good()){
@@ -41,7 +41,7 @@ void Geometry::LoadCAD(std::string name){
   }
   
 }
-bool Geometry::InSolid(double pos[3]){
+bool Geometry::InSolid(double pos[3]){//Check if the point is inside or outside of the geometry.
   double far[3],tmp[3];
   far[0]=pos[0]; far[1]=pos[1]; far[2]=world;
   int ncol = 0;
