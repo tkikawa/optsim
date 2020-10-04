@@ -1,36 +1,25 @@
 [Global]
 #Number of generated optical photons to be simulated
-Number 10000
+Number 100000
 #Refractive index of surroundings (air)
 Index 1.0
 
 [Material]
-############# Material ID ################
-# When the geometries of two materials overlaps, the material with small ID stands in the overlapped region.
-##########################################
-
-############ Material types ###############
-# medium: Normal medium in which optical photon transmits. Refractive index and attenuation length (mm) for the absorption in the medium must be specified. The absorption can be inactivated by giving 0 for the attenuation length.
-# mirror: When the optical photon reaches the surface the material, it is specularly reflected.
-# diffuser: When the optical photon reaches the surface the material, it is diffusely reflected.
-# absorber: When the optical photon reaches the surface the material, it is absorbed.
-# detector: When the optical photon reaches the surface the material, it is absorbed. The behavior in the simulation is the same as absorber but is tagged as detected in the output ROOT file.
-###########################################
-
-#ID	CAD-file	material_type	refractive_index	attnuation_length(mm)
-1	in/metium.STL	medium		1.592			30
-2	in/mirror.STL	mirror
-3	in/diffuser.STL	diffuser
-4	in/absorber.STL	absorber
-5	in/detector.STL	detector
+#ID	CADfile		material_type	refractive_index	attnuation_length(mm)	scattering_length(mm)
+1       examples/simple/scintillator.stl        medium          1.592                   100                     0
+2       examples/simple/fiber.stl       converter               1.592                   3500                    0
+3       examples/simple/reflector.stl   diffuser
+4       examples/simple/mirror.stl      mirror
+5       examples/simple/absorber.stl    absorber
+6       examples/simple/detector.stl    detector
 
 [Source]
-############ Source modes ###############
-# CADvolume: Source volume is given by a CAD file. Photons are uniformly created in the space completely surrounded by surface of the CAD file.
-# CADsurface: Starting points are on triangles whose vertices are all in the given CAD-volume.
-# boxvolume: Photon starting values are uniformly diced in a box volume with the given parameter range (x,y,z).
-# cylvolume: Photon starting values are uniformly diced in a cylindrical volume with the given parameter range (r,phi,z).
-# cylsurface: Photon starting values are uniformly diced in the surface of cylinder with the given parameter range (r,phi,z).
+############ source modes ###############
+# CADvolume: source volume is given by a CAD file, particles are created in the space completely surrounded by the CAD-surface
+# boxvolume: particle starting values are diced in the given parameter range (x,y,z)
+# cylvolume: particle starting values are diced in the given parameter range (r,phi,z)
+# CADsurface: starting values are on triangles whose vertices are all in the given CAD-volume
+# cylsurface: starting values are on triangles which have at least one vertex in the given parameter range (r,phi,z)
 #########################################
 
 #cylsurface	r_min	r_max	phi_min	phi_max	z_min	z_max
@@ -43,16 +32,16 @@ Index 1.0
 #boxvolume	0	1	0	1	0	1
 
 #CADsurface	CAD-file
-#CADsurface 	in/source.STL
+#CADsurface 	examples/simple/scintillator.stl
 
 #CADvolume	CAD-file
-CADvolume 	in/source.STL
+CADvolume 	examples/simple/scintillator.stl
 
 [Direction]
-########### Direction modes #############
-# isotropic: Photons are emitted isotropically.
-# flat: Photons are directionally emitted with a divergence angle of flat distribution (v_x, v_y, v_z, phi).
-# gauss: Photons are directionally emitted with a divergence angle of Gaussian distribution (v_x, v_y, v_z, phi).
+########### direction modes #############
+# isotropic: photons are emmitted isotropically
+# flat: photons are directionally emitted with a divergence angle of flat distribution (v_x, v_y, v_z, phi)
+# gauss: photons are directionally emitted with a divergence angle of Gaussian distribution (v_x, v_y, v_z, phi)
 #########################################
 
 isotropic

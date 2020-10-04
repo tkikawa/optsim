@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
     std::istringstream(i->first) >> id;
     std::istringstream ss(i->second);
     ss >> matfile >> type;
-    if(type=="medium"){
+    if(type=="medium" || type=="converter"){
       ss >> index >> attlen >> scatlen;
     }
     else{

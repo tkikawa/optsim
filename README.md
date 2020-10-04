@@ -10,7 +10,7 @@ Advantages of this simulator are
 ## 1. External libraries
 
 ### ASSIMP
-[ASSIMP](https://github.com/assimp/assimp) is a portable open source library to import various well-known 3D model formats in a uniform manner. ASSIMP v.5.0.1 has been tested. ASSIMP code on SourceForge.net in which v.3.3.1 is the latest version is out of date. If you try to compile this version on Ubuntu, a compile error will occur. Please download the latest code from [GitHub](https://github.com/assimp/assimp/releases).
+[ASSIMP](https://www.assimp.org/index.php) is a portable open source library to import various well-known 3D model formats in a uniform manner. ASSIMP v.5.0.1 has been tested. ASSIMP code on SourceForge.net in which v.3.3.1 is the latest version is out of date. If you try to compile this version on Ubuntu, a compile error will occur. Please download the latest code from [GitHub](https://github.com/assimp/assimp/releases).
 - [Documentations](https://assimp-docs.readthedocs.io/en/latest/)
 - [Supported formats](https://github.com/assimp/assimp/blob/master/doc/Fileformats.md)
 - [Latest releases](https://github.com/assimp/assimp/releases)
@@ -24,11 +24,12 @@ Advantages of this simulator are
 
 ## 2. Installation
 
-For the installation, [cmake](http://www.cmake.org/) is used. The cmake version newer than 2.8 must be used. (cmake v.2.6 is normally installed in Scientific Linux 6.)
+For the installation of ASSIMP, [cmake](http://www.cmake.org/) is used. The cmake version 3.0 or higher is required. (cmake v.2.6 is normally installed in Scientific Linux 6.)
 
 ### Installation of ASSIMP
 
 - Download the codes from [ASSIMP GitHub](https://github.com/assimp/assimp/releases) and decompress it.
+    - git clone https://github.com/assimp/assimp.git
 - cmake CMakeLists.txt
 - make
 - Set environment variables as follows.
@@ -71,6 +72,8 @@ Meshes constituting the material geometry are displayed in different colors acco
 - **Green**: diffuser material
 - **Cyan**: absorber material
 - **Blue**: detector material
+
+![Event display](figures/eventdisplay.png)
 
 When the display mode is launched, only the material geometry is displayed.
 The display mode is interactive. Input positive integer to simulate and display the tracks of the optical photons.
@@ -137,9 +140,13 @@ Following direction modes are available.
 - **flat**: Photons are directionally emitted with a divergence angle of flat distribution (v_x, v_y, v_z, phi).
 - **gauss**: Photons are directionally emitted with a divergence angle of Gaussian distribution (v_x, v_y, v_z, phi).
 
-## 6. Output ROOT file
+## 6. Examples
+As examples of input for this optical simulator, several sets of input card file and CAD files for the geometry are prepared in [examples directory](https://github.com/tkikawa/optsim/tree/master/examples).
 
-The output ROOT files have a TTree *tree and branches shown below.
+
+## 7. Output ROOT file
+
+The output ROOT file has a TTree *tree and branches shown below.
 - **ipos[3]**: Initial position of optical photon (mm). [0], [1], [2] for x, y, z.
 - **fpos[3]**: Final position of optical photon (mm). [0], [1], [2] for x, y, z.
 - **ivec[3]**: Initial direction of optical photon (mm). ([0], [1], [2] for x, y, z.
@@ -156,7 +163,7 @@ The output ROOT files have a TTree *tree and branches shown below.
 - **nref**: Number of reflections of optical photon in boundaries.
 - **npas**: Number of transmissions of optical photon in boundaries.
 
-## 7. Simulation process
+## 8. Simulation process
 
 Initial position and direction of the optical photon are determined based on [Source] and [Direction] of input card file.
 Intersection of the track and boundary of the material is obtained.
@@ -168,4 +175,6 @@ The intersection is regarded as the new position. The new direction is determine
 
 ![Behavior of optical photon in the boundary](figures/boundary.png)
 
+In each step, probabilities of absorption or scattering in the material are calculated from the path length of the step, average absorption or scattering lengths.
+Following the probabilities, the optical photon is sometimes absorbed or scattered in the material.
 This process is repeated until the optical photon is absorbed or go out of the world volume.

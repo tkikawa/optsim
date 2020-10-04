@@ -123,7 +123,7 @@ void Simulator::Run(){//Run simulation
       }//end of for
       
     ENDLOOP:
-      if(btype!=2){
+      if(btype!=-2){
 	pl=sqrt(pow(newpos[0]-pos[0],2)+pow(newpos[1]-pos[1],2)+pow(newpos[2]-pos[2],2));
 	if(attlen>0||scatlen>0){//When attlen==0 (scatlen==0), absorption (scattering) in the medium does not occur.
 	  if(attlen>0)apl=-attlen*log(unirand(mt));
@@ -149,6 +149,14 @@ void Simulator::Run(){//Run simulation
 	time+=pl/c_0*index;
 	if(displaymode){
 	  Track(pos,newpos);
+	}
+      }
+      else{
+	if(displaymode){
+	  for(int j=0;j<3;j++){
+	    cand[j]=pos[j]+vec[j]*world*2;
+	  }
+	  Track(pos,cand);
 	}
       }
       if(btype >= -1 && btype <=3){
@@ -200,7 +208,7 @@ void Simulator::Run(){//Run simulation
 void Simulator::Display(){//Event display mode
   displaymode=true;
   double vtx[3][3];
-  TCanvas *c1 = new TCanvas("Event display","Event display",800,800);
+  TCanvas *c1 = new TCanvas("Event display","Event display",hsize,vsize);
   TView *view = TView::CreateView(1);
   x_min = y_min = z_min = world;
   x_max = y_max = z_max = -world;
