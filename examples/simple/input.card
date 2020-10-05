@@ -9,7 +9,7 @@ Index 1.0
 3	examples/simple/reflector.stl	diffuser
 4	examples/simple/mirror.stl	mirror
 5	examples/simple/absorber.stl	absorber
-6	examples/simple/detector.stl	detector
+6	examples/simple/mppc.stl	detector
 
 [Source]
 CADvolume 	examples/simple/scintillator.stl

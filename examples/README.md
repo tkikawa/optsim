@@ -9,6 +9,8 @@ Example of a simple geometry including all kinds of materials (normal medium, co
 Command to run the simulation with this example is  
 ./OptSim examples/simple/input.card output.root
 
+![Simple geometry example](../figures/simple.png)
+
 ## 2. [Cubic scintillator for Super-FGD](https://github.com/tkikawa/optsim/tree/master/examples/sfgd_cube)
 
 Example of 1cm*1cm*1cm cubic scintillator used for Super-FGD.
@@ -44,7 +46,7 @@ Command to run the simulation with this example is
 Command to run the simulation with this example is  
 ./OptSim examples/fiber/input_absorber.card output.root
 
-![Geometry of wavelength shifting fiber](../figures/wls_fiber.png)
+![Geometry of wavelength shifting fiber](../figures/fiber.png)
 
 ## 4. Scintillator with wavy fiber for Wall MRD
 

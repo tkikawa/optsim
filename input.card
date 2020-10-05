@@ -5,13 +5,13 @@ Number 100000
 Index 1.0
 
 [Material]
-#ID	CADfile		material_type	refractive_index	attnuation_length(mm)	scattering_length(mm)
-1       examples/simple/scintillator.stl        medium          1.592                   100                     0
-2       examples/simple/fiber.stl       converter               1.592                   3500                    0
-3       examples/simple/reflector.stl   diffuser
-4       examples/simple/mirror.stl      mirror
-5       examples/simple/absorber.stl    absorber
-6       examples/simple/detector.stl    detector
+#ID	CADfile					material_type	refractive_index	attnuation_length(mm)	scattering_length(mm)
+1       examples/simple/scintillator.stl	medium		1.592			100			0
+2       examples/simple/fiber.stl		converter	1.592			3500			0
+3       examples/simple/reflector.stl		diffuser
+4       examples/simple/mirror.stl		mirror
+5       examples/simple/absorber.stl		absorber
+6       examples/simple/mppc.stl		detector
 
 [Source]
 ############ source modes ###############
