@@ -79,3 +79,15 @@ Command to run the simulation with this example is
 ./OptSim examples/baby_mind/input.card output.root
 
 ![Geometry of Baby MIND vertical scintillator](../figures/baby_mind.png)
+
+## 5. [LGP calibration system for Super-FGD](https://github.com/tkikawa/optsim/tree/master/examples/lgp)
+
+Example of LGP calibration system for Super-FGD.
+The LGP is defined as medium with index=1.592 and att.length=5000mm and no scattering.
+Under the LGP, there are notches which are defined as diffuser.
+The led volume is given in the edge of the LGP and it is defined as the optical photon source.
+On the top of the LGP, detector is placed to see the photon distribution on the top.
+Command to run the simulation with this example is  
+./OptSim examples/lgp/input.card output.root
+
+![Geometry of LGP calibration system](../figures/lgp.png)
