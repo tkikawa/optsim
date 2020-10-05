@@ -29,12 +29,14 @@ For the installation of ASSIMP, [cmake](http://www.cmake.org/) is used. The cmak
 ### Installation of ASSIMP
 
 - Download the codes from [ASSIMP GitHub](https://github.com/assimp/assimp/releases) and decompress it.
-    - git clone https://github.com/assimp/assimp.git
 - cmake CMakeLists.txt
 - make
 - Set environment variables as follows.
     - export ASSIMP=(path to ASSIMP installation directory)
     - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${ASSIMP}/lib
+    
+If you want to use ASSIMP on Ubuntu, you can easiliy install it only with the following command.
+    - sudo apt-get install assimp
 
 ### Installation of ROOT
 - Download the binary file from [ROOT website](https://root.cern.ch/downloading-root) and decompress it.
@@ -156,7 +158,8 @@ The output ROOT file has a TTree *tree and branches shown below.
 - **imat**: Material ID in which optical photon was generated.
 - **fmat**: Material ID in which optical photon ended.
 - **ftype**: ID which identifies how optical photon ended.
-    - 1: Go out of world volume.
+    - 0: Go out of world volume.
+    - 1: Exceed limit of reflections    
     - 2: Absorbed in normal medium.
     - 3: Absorbed by absorber.
     - 4: Detected by detector.

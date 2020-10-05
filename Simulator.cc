@@ -191,6 +191,10 @@ void Simulator::Run(){//Run simulation
 	}
       }
       else break;//Absorbed, detected or go out of world volume.
+      if(nref>nreflimit){
+	btype=-4;
+	break;
+      }
     }//end of while
     for(int j=0;j<3;j++){
       fpos[j]=newpos[j];
@@ -277,7 +281,8 @@ void Simulator::Initialize(){//Initialize the variables.
   time=0;
 }
 int Simulator::FType(int bt){//Conver the temporary type ID to final type ID
-  if(bt==-2)return 1;     //Go out of world volume.
+  if(bt==-2)return 0;     //Go out of world volume.
+  else if(bt==-4)return 1;//Exceed the limit of reflections
   else if(bt==-3)return 2;//Absorbed in normal medium.
   else if(bt==4)return 3; //Absorbed by absorber
   else if(bt==5)return 4; //Detected by detector
@@ -287,10 +292,11 @@ int Simulator::FType(int bt){//Conver the temporary type ID to final type ID
   }
 }
 void Simulator::Summary(){//Display the summary of simulation
-  std::cout<<"Go out of world volume   : "<<count[1]<<std::endl;
-  std::cout<<"Absorved in normal medium: "<<count[2]<<std::endl;
-  std::cout<<"Absorbed by absorber     : "<<count[3]<<std::endl;
-  std::cout<<"Detected by detector     : "<<count[4]<<std::endl;
+  std::cout<<"Go out of world volume     : "<<count[0]<<std::endl;
+  std::cout<<"Exceed limit of reflections: "<<count[1]<<std::endl;
+  std::cout<<"Absorved in normal medium  : "<<count[2]<<std::endl;
+  std::cout<<"Absorbed by absorber       : "<<count[3]<<std::endl;
+  std::cout<<"Detected by detector       : "<<count[4]<<std::endl;
 }
 bool Simulator::Fresnel(double v[3], double *newv, double norm[3], double idx_in, double idx_out){//Determine if the optical photon is reflected or transmitted with refraction following the Fresnel equation
   double idx_ratio=idx_out/idx_in;

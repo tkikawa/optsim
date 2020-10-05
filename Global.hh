@@ -13,6 +13,7 @@ static const double world=1e4; //World size in +/- X, Y, Z (mm) [region in which
 static const double nano=1e-6;
 static const double micro=1e-3;
 static const double cadunit=1; //Unit of CAD files [1 for mm, 10 for cm, 1000 for m]
+static const double nreflimit=1e5; //Limit of the number of reflections
 static const double hsize=1000;//Horizontal size of event display
 static const double vsize=1000;//Vertical size of event display
 

@@ -13,7 +13,7 @@ Command to run the simulation with this example is
 
 ## 2. [Cubic scintillator for Super-FGD](https://github.com/tkikawa/optsim/tree/master/examples/sfgd_cube)
 
-Example of 1cm*1cm*1cm cubic scintillator used for Super-FGD.
+Example of 1cm * 1cm * 1cm cubic scintillator used for Super-FGD.
 The scintillator is defined as medium with index=1.592 and att.length=30mm and no scattering.
 The scintillator is surrounded by reflector coating with is defined as reflector.
 1.0mm fibers go through 1.5 diameter-holes drilled on the scintillator.
@@ -49,5 +49,7 @@ Command to run the simulation with this example is
 ![Geometry of wavelength shifting fiber](../figures/fiber.png)
 
 ## 4. Scintillator with wavy fiber for Wall MRD
+
+![Geometry of Wall MRD scintillator](../figures/wall_mrd.png)
 
 ## 5. Scintillator with U-shape fiber for Baby MIND
