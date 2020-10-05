@@ -6,6 +6,12 @@ As examples of input for this optical simulator, several sets of input card file
 ## 1. [Simple geometry](https://github.com/tkikawa/optsim/tree/master/examples/simple)
 
 Example of a simple geometry including all kinds of materials (normal medium, converter, mirror, diffuser, absorber and detector).
+A 1cm * 1cm * 10cm scintillator bar is defined as medium with index=1.592 and att.length=100mm and no scattering.
+It is surrounded by reflector coating with is defined as reflector.
+1.0mm fibers go through a 1.5 diameter-hole drilled on the center of the scintillator.
+A detector is placed on one end of the fiber and a mirror is plaecd on the other end of the fiber.
+A absorber is placed on the same side of the scintillator as the mirror.
+The scintillator volume is defined as the optical photon source.
 Command to run the simulation with this example is  
 ./OptSim examples/simple/input.card output.root
 
@@ -15,7 +21,7 @@ Command to run the simulation with this example is
 
 Example of 1cm * 1cm * 1cm cubic scintillator used for Super-FGD.
 The scintillator is defined as medium with index=1.592 and att.length=30mm and no scattering.
-The scintillator is surrounded by reflector coating with is defined as reflector.
+It is surrounded by reflector coating with is defined as reflector.
 1.0mm fibers go through 1.5 diameter-holes drilled on the scintillator.
 The fibers are defined as detector in order to estimate the light collection efficiency to the fibers.
 The scintillator volume is defined as the optical photon source.
@@ -48,8 +54,28 @@ Command to run the simulation with this example is
 
 ![Geometry of wavelength shifting fiber](../figures/fiber.png)
 
-## 4. Scintillator with wavy fiber for Wall MRD
+## 4. [Scintillator with wavy fiber for Wall MRD](https://github.com/tkikawa/optsim/tree/master/examples/wall_mrd)
+
+Example of scintillator with wavy fiber for Wall MRD.
+The scintillator is defined as medium with index=1.592 and att.length=100mm and no scattering.
+It is surrounded by reflector coating with is defined as reflector.
+A Wavy fiber goes through the scintillator.
+Detectors are attached on the both sides of the fiber.
+The scintillator volume is defined as the optical photon source.
+Command to run the simulation with this example is  
+./OptSim examples/wall_mrd/input.card output.root
 
 ![Geometry of Wall MRD scintillator](../figures/wall_mrd.png)
 
-## 5. Scintillator with U-shape fiber for Baby MIND
+## 5. [Scintillator with U-shape fiber for Baby MIND](https://github.com/tkikawa/optsim/tree/master/examples/baby_mind)
+
+Example of scintillator with U-shape fiber for Baby MIND.
+The scintillator is defined as medium with index=1.592 and att.length=100mm and no scattering.
+It is surrounded by reflector coating with is defined as reflector.
+A Wavy fiber goes through the scintillator.
+Detectors are attached on the both sides of the fiber.
+The scintillator volume is defined as the optical photon source.
+Command to run the simulation with this example is  
+./OptSim examples/baby_mind/input.card output.root
+
+![Geometry of Baby MIND vertical scintillator](../figures/baby_mind.png)
