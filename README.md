@@ -36,7 +36,7 @@ For the installation of ASSIMP, [cmake](http://www.cmake.org/) is used. The cmak
     - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${ASSIMP}/lib
     
 If you want to use ASSIMP on Ubuntu, you can easiliy install it only with the following command.
-    - sudo apt-get install assimp
+- sudo apt-get install assimp
 
 ### Installation of ROOT
 - Download the binary file from [ROOT website](https://root.cern.ch/downloading-root) and decompress it.
