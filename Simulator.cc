@@ -238,7 +238,6 @@ void Simulator::Display(){//Event display mode
   view->SetRange((x_max-x_min-r_max)/2, (y_max-y_min-r_max)/2, (z_max-z_min-r_max)/2,
 		 (x_max-x_min+r_max)/2, (y_max-y_min+r_max)/2, (z_max-z_min+r_max)/2);
 
-  c1->Update();
   std::cout<<"******** Display mode ********"<<std::endl;
   std::cout<<"Red:    normal medium material"<<std::endl;
   std::cout<<"Magenta:converter material"<<std::endl;
@@ -250,14 +249,28 @@ void Simulator::Display(){//Event display mode
   while(1){
     std::cout<<"Waiting for input."<<std::endl;
     std::cout<<"\"quit\" or \"exit\": Terminate the display mode."<<std::endl;
+    std::cout<<"\"gui\"           : Switch to GUI control mode."<<std::endl;
+    std::cout<<"\"save\"          : Save the event display."<<std::endl;
     std::cout<<"Positive integer: Generate photons and display tracks."<<std::endl;
+    c1->Update();
     std::cin >> msg;
     if(msg=="quit" || msg=="exit")break;
-    if(std::all_of(msg.cbegin(), msg.cend(), isdigit)){
+    else if(msg=="gui"){
+      std::cout<<"Switched to GUI control mode."<<std::endl;
+      std::cout<<"Event display can be rotated or cotrolled with mouse."<<std::endl;
+      std::cout<<"Double click the event display to switch to GUI control mode."<<std::endl;
+      c1->WaitPrimitive();
+      std::cout<<"Switched to CUI control mode."<<std::endl;
+    }
+    else if(msg=="save"){
+      std::cout<<"File name :"<<std::flush;
+      std::cin >> msg;
+      c1->Print(msg.c_str());
+    }
+    else if(std::all_of(msg.cbegin(), msg.cend(), isdigit)){
       if(stoi(msg)>0){
 	nevt=stoi(msg);
 	Run();
-	c1->Update();
       }
     }
   }
