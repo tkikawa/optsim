@@ -41,7 +41,7 @@ void Simulator::Run(){//Run simulation
     std::cout<<"0%       25%       50%       75%       100%"<<std::endl;
     std::cout<<"+---------+---------+---------+---------+"<<std::endl;;
   }
-  double ndev40=nevt/40;
+  double ndev40=nevt/40.;
   int nprog=0;
   for(int i=0;i<nevt;i++){
     if(progbar){
@@ -53,15 +53,19 @@ void Simulator::Run(){//Run simulation
 	std::cout<<"#"<<std::endl;
       }
     }
-    src->Generate(pos, vec);//Determine the initial position and direction
-    mn=PointMaterial(pos);  //Check the material of initial position
-    if(mn!=-1){//Initial position is in the defined material.
+    while(1){
+      src->Generate(pos, vec);//Determine the initial position and direction
+      mn=PointMaterial(pos);//Check the material of initial position
+      if(mn==-1)break;//Check if initial position of out of material volumes (i.e. air).
+      else if(mat[mn].Type()<=1)break;//Check if the material type is medium or converter
+    }
+    if(mn!=-1){//Initial position is in the defined material volumes.
       matid=mat[mn].ID();
       index=mat[mn].Index();
       attlen=mat[mn].AttLen();
       scatlen=mat[mn].ScatLen();
     }
-    else{//Initial position is not in the defined materials and is in surrounding material (air).
+    else{//Initial position is out of the defined material volumes and is in surrounding (air).
       matid=0;
       index=index0;
       attlen=0;
@@ -88,7 +92,7 @@ void Simulator::Run(){//Run simulation
 	  continue;
 	}
 	for(int t=0;t<mat[m].NTriangle();t++){//loop for Triangles
-	  if(mat[m].GetTriangle(t).Collision(pos,cross,cand)){
+	  if(mat[m].GetTriangle(t).Collision(pos,cross,cand)){//Check if a line between two points collides with the triangle or not
 	    for(int j=0;j<3;j++){
 	      newpos[j]=cand[j];
 	      if(matid==0){
