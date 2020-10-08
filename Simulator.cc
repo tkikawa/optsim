@@ -258,7 +258,7 @@ void Simulator::Display(){//Event display mode
     else if(msg=="gui"){
       std::cout<<"Switched to GUI control mode."<<std::endl;
       std::cout<<"Event display can be rotated or cotrolled with mouse."<<std::endl;
-      std::cout<<"Double click the event display to switch to GUI control mode."<<std::endl;
+      std::cout<<"Double click the event display to switch back to CUI control mode."<<std::endl;
       c1->WaitPrimitive();
       std::cout<<"Switched to CUI control mode."<<std::endl;
     }

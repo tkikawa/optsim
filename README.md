@@ -81,6 +81,8 @@ When the display mode is launched, only the material geometry is displayed.
 The display mode is interactive. Input positive integer to simulate and display the tracks of the optical photons.
 The tracks are displayed in black.
 Input "quit" or "exit" to terminate the display mode.
+Input "save" to save the event display.
+Input "gui" to switch to GUI control mode in which the event display can be rotated or cotrolled with mouse. Double click the event display to switch back to CUI control mode.
 
 ## 4. Geometry
 
@@ -89,7 +91,7 @@ Input "quit" or "exit" to terminate the display mode.
 Material geometry can be imported from [various well-known 3D model formats](https://github.com/assimp/assimp/blob/master/doc/Fileformats.md).
 Importation of [binary STL files](http://en.wikipedia.org/wiki/STL_%28file_format%29) was tested.
 STL files use a list of triangles to describe 3D-surfaces. They can be created with most CAD software, e.g. [Inventor](https://www.autodesk.co.jp/products/inventor/overview) or [Solidworks](https://www.solidworks.com/) via "File - Save As..." using the STL file type.
-Note the "Options..." button in the Save dialog, there you can change format (only binary supported), resolution, coordinate system etc.
+Note the "Options..." button in the Save dialog, there you can change format (only binary supported), resolution, coordinate system, unit etc. The unit should be mm. In order to inport CAD files with different unit (e.g. cm, m), you need to change cadunit in Global.hh.
 
 Do not choose a too high resolution. Usually, setting the deviation tolerance to a value small enough to represent every detail in your geometry and leaving angle tolerance at the most coarse setting is good enough. Low angle tolerance quickly increases triangle count and degeneracy.
 
