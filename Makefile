@@ -8,7 +8,7 @@ CXXFLAGS	+= $(ROOTCFLAGS)
 LIBS 		= $(ROOTLIBS)
 
 ifeq ($(shell uname),Darwin)
-ASSIMPLIBS       = $(ASSIMP)/bin/libassimp.dylib
+ASSIMPLIBS       = $(ASSIMP)/lib/libassimp.dylib
 else
 ASSIMPLIBS       = $(ASSIMP)/lib/libassimp.so
 endif
