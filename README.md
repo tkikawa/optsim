@@ -35,8 +35,11 @@ For the installation of ASSIMP, [cmake](http://www.cmake.org/) is used. The cmak
     - export ASSIMP=(path to ASSIMP installation directory)
     - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${ASSIMP}/lib
 
-If you want to use ASSIMP on Ubuntu, you can easiliy install it only with the following command.
+If you use Ubuntu, you can easiliy install it only with the following command.
 - sudo apt-get install assimp
+
+If you use MAC, you can easiliy install it only with the following command.
+- sudo brew install assimp
 
 ### Installation of ROOT
 - Download the binary file from [ROOT website](https://root.cern.ch/downloading-root) and decompress it.
@@ -46,6 +49,9 @@ If you want to use ASSIMP on Ubuntu, you can easiliy install it only with the fo
     - export LD_LIBRARY_PATH=${ROOTSYS}/lib:${LD_LIBRARY_PATH}
 - or
     - source (path to ROOT installation directory)/bin/thisroot.sh
+
+If you use MAC, you can easiliy install it only with the following command.
+- sudo brew install root
 
 ### Installation of this optical simulator
 
