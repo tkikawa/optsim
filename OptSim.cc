@@ -11,6 +11,7 @@
 #include <vector>
 #include <sstream>
 #include <random>
+#include <getopt.h>
 #include <sys/time.h>
 #include <TApplication.h>
 #include "Global.hh"
