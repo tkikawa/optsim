@@ -7,7 +7,12 @@ ROOTGLIBS    	:= $(shell root-config --glibs)
 CXXFLAGS	+= $(ROOTCFLAGS)
 LIBS 		= $(ROOTLIBS)
 
+ifeq ($(shell uname),Darwin)
+ASSIMPLIBS       = $(ASSIMP)/bin/libassimp.dylib
+else
 ASSIMPLIBS       = $(ASSIMP)/lib/libassimp.so
+endif
+
 ASSIMPINC        = $(ASSIMP)/include
 LIBS 		+= -lm $(ASSIMPLIBS)
 CXXFLAGS	+= -I$(ASSIMPINC)
