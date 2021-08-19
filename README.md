@@ -32,9 +32,12 @@ For the installation of ASSIMP, [cmake](http://www.cmake.org/) is used. The cmak
 - cmake CMakeLists.txt
 - make
 - Set environment variables as follows.
-    - export ASSIMP=(path to ASSIMP installation directory)
-    - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${ASSIMP}/lib
-    
+    - For Linux
+      export ASSIMP=(path to ASSIMP installation directory)
+      export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${ASSIMP}/lib
+    - For Mac
+      export ASSIMP=(path to ASSIMP installation directory)
+      export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${ASSIMP}/bin
 If you want to use ASSIMP on Ubuntu, you can easiliy install it only with the following command.
 - sudo apt-get install assimp
 
