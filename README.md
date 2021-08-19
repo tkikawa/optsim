@@ -38,7 +38,7 @@ For the installation of ASSIMP, [cmake](http://www.cmake.org/) is used. The cmak
 If you use Ubuntu, you can easiliy install it only with the following command.
 - sudo apt-get install assimp
 
-If you use MAC, you can easiliy install it only with the following command.
+If you use Mac, you can easiliy install it only with the following command.
 - sudo brew install assimp
 
 ### Installation of ROOT
@@ -50,7 +50,7 @@ If you use MAC, you can easiliy install it only with the following command.
 - or
     - source (path to ROOT installation directory)/bin/thisroot.sh
 
-If you use MAC, you can easiliy install it only with the following command.
+If you use Mac, you can easiliy install it only with the following command.
 - sudo brew install root
 
 ### Installation of this optical simulator
