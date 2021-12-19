@@ -163,7 +163,7 @@ void Simulator::Run(){//Run simulation
 	  Track(pos,cand);
 	}
       }
-      if(btype >= -1 && btype <=3){
+      if(btype >= -1 && btype <=4){
 	if(btype <= 1){
 	  if(Fresnel(vec,newvec,normal,index,newindex)){//Determine if the optical photon is reflected or transmitted with refraction following the Fresnel equation
 	    mn=newmn;
