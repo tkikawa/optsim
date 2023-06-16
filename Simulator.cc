@@ -172,6 +172,9 @@ void Simulator::Run(){//Run simulation
 	    attlen=newattlen;
 	    scatlen=newscatlen;
 	    npas++;
+	    if(btype == 1){//Isotropic scattering for converter
+	      Isotropic(newvec);
+	    }
 	  }
 	  else{
 	    nref++;
@@ -189,9 +192,6 @@ void Simulator::Run(){//Run simulation
 	for(int j=0;j<3;j++){
 	  pos[j]=newpos[j]+newvec[j]*nano;
 	  vec[j]=newvec[j];
-	}
-	if(btype == 1){//Isotropic scattering for converter
-	  Isotropic(vec);
 	}
       }
       else break;//Absorbed, detected or go out of world volume.
