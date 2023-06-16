@@ -10,7 +10,7 @@ Advantages of this simulator are
 ## 1. External libraries
 
 ### ASSIMP
-[ASSIMP](https://www.assimp.org/index.php) is a portable open source library to import various well-known 3D model formats in a uniform manner. ASSIMP v.5.0.1 has been tested. ASSIMP code on SourceForge.net in which v.3.3.1 is the latest version is out of date. If you try to compile this version on Ubuntu, a compile error will occur. Please download the latest code from [GitHub](https://github.com/assimp/assimp/releases).
+[ASSIMP](https://www.assimp.org/) is a portable open source library to import various well-known 3D model formats in a uniform manner. ASSIMP v.5.0.1 has been tested. ASSIMP code on SourceForge.net in which v.3.3.1 is the latest version is out of date. If you try to compile this version on Ubuntu, a compile error will occur. Please download the latest code from [GitHub](https://github.com/assimp/assimp/releases).
 - [Documentations](https://assimp-docs.readthedocs.io/en/latest/)
 - [Supported formats](https://github.com/assimp/assimp/blob/master/doc/Fileformats.md)
 - [Latest releases](https://github.com/assimp/assimp/releases)
