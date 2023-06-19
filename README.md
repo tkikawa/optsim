@@ -159,7 +159,7 @@ As examples of input for this optical simulator, several sets of input card file
 The output ROOT file has a TTree *tree and branches shown below.
 - **ipos[3]**: Initial position of optical photon (mm). [0], [1], [2] for x, y, z.
 - **fpos[3]**: Final position of optical photon (mm). [0], [1], [2] for x, y, z.
-- **ivec[3]**: Initial direction of optical photon (mm). ([0], [1], [2] for x, y, z.
+- **ivec[3]**: Initial direction of optical photon (mm). [0], [1], [2] for x, y, z.
 - **fvec[3]**: Final direction of optical photon (mm). [0], [1], [2] for x, y, z.
 - **time**: Time from generation to end of optical photon (ns).
 - **length**: Total path length traveled by optical photon (mm).
