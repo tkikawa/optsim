@@ -1,6 +1,7 @@
 #include "Geometry.hh"
 
-Geometry::Geometry()
+Geometry::Geometry(std::mt19937 MT)
+  : mt(MT)
 {
 }
 Geometry::~Geometry()

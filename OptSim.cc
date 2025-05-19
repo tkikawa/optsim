@@ -89,14 +89,11 @@ int main(int argc, char *argv[])
     mt.seed(rnd());
   }
 
-  std::cout<<"Setting up simulator."<<std::endl;
-  Simulator *sim = new Simulator(mt,config,output);
-
   std::cout<<"Loading source data."<<std::endl;
   Source *src = new Source(mt,config);
-  sim->SetSource(src);
 
   std::cout<<"Loading material data."<<std::endl;
+  std::vector<Material*> materials;
   std::string matfile, type;
   int id;
   double index, attlen, scatlen;
@@ -113,9 +110,12 @@ int main(int argc, char *argv[])
       scatlen=0;
     }
     Material *mat = new Material(mt,id, matfile, type, index, attlen, scatlen);
-    sim->AddMaterial(mat);
+    materials.push_back(mat);
   }
 
+  std::cout<<"Setting up simulator."<<std::endl;
+  Simulator *sim = new Simulator(mt,config,output,src,materials);
+  
   std::cout<<"Start simulation."<<std::endl;
   if(!dmode)sim->Run();//Normal run mode
   else sim->Display();//Display mode

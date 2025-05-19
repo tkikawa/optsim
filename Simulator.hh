@@ -17,10 +17,8 @@
 class Simulator
 {
 public:
-  Simulator(std::mt19937 MT, Config config, std::string OUTPUT);
+  Simulator(std::mt19937 MT, Config config, std::string OUTPUT, Source *SRC, std::vector<Material*> &MAT);
   virtual ~Simulator();
-  void AddMaterial(Material *MAT);
-  void SetSource(Source *SRC);
   void Run();
   void Display();
   
@@ -41,7 +39,7 @@ private:
   std::mt19937 mt;
   std::uniform_real_distribution<double> unirand;
   std::string output;
-  std::vector<Material> mat;
+  std::vector<Material*> mat;
   Source *src;
   int nevt;
   double index0;

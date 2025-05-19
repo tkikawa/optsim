@@ -15,7 +15,7 @@
 class Geometry
 {
 public:
-  Geometry();
+  Geometry(std::mt19937 MT);
   virtual ~Geometry();
   void LoadCAD(std::string name);
   int NTriangle(){return triangle.size();}

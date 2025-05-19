@@ -1,23 +1,19 @@
 #include "Simulator.hh"
 
-Simulator::Simulator(std::mt19937 MT, Config config, std::string OUTPUT)
+Simulator::Simulator(std::mt19937 MT, Config config, std::string OUTPUT, Source *SRC, std::vector<Material*> &MAT)
+  : mt(MT),
+    output(OUTPUT),
+    src(SRC),
+    mat(MAT),
+    nevt(10000),
+    index0(1),
+    displaymode(false)
 {
-  mt = MT;
-  output = OUTPUT;
-  nevt=10000;
-  index0=1;
   std::istringstream(config["Global"]["Number"]) >> nevt;
   std::istringstream(config["Global"]["Index"]) >> index0;
-  displaymode=false;
 }
 Simulator::~Simulator()
 {
-}
-void Simulator::AddMaterial(Material *MAT){//Add material to the simulator
-  mat.push_back(*MAT);
-}
-void Simulator::SetSource(Source *SRC){//Set source in the simulator
-  src = SRC;
 }
 void Simulator::Run(){//Run simulation
   file = new TFile(output.c_str(), "recreate");
@@ -57,13 +53,13 @@ void Simulator::Run(){//Run simulation
       src->Generate(pos, vec);//Determine the initial position and direction
       mn=PointMaterial(pos);//Check the material of initial position
       if(mn==-1)break;//Check if initial position of out of material volumes (i.e. air).
-      else if(mat[mn].Type()<=1)break;//Check if the material type is medium or converter
+      else if(mat[mn]->Type()<=1)break;//Check if the material type is medium or converter
     }
     if(mn!=-1){//Initial position is in the defined material volumes.
-      matid=mat[mn].ID();
-      index=mat[mn].Index();
-      attlen=mat[mn].AttLen();
-      scatlen=mat[mn].ScatLen();
+      matid=mat[mn]->ID();
+      index=mat[mn]->Index();
+      attlen=mat[mn]->AttLen();
+      scatlen=mat[mn]->ScatLen();
     }
     else{//Initial position is out of the defined material volumes and is in surrounding (air).
       matid=0;
@@ -76,37 +72,37 @@ void Simulator::Run(){//Run simulation
       btype = -2;
       for(int j=0;j<3;j++)cross[j]=pos[j]+vec[j]*world;//far point on the straight-line of the track
       for(unsigned int m=0;m<mat.size();m++){//loop for Materials
-	if(matid!=0&&matid<mat[m].ID()&&btype>-1){
+	if(matid!=0&&matid<mat[m]->ID()&&btype>-1){
 	  goto ENDLOOP;
 	}
-	else if(matid!=0&&matid<mat[m].ID()&&btype==-1){
-	  if(mat[m].InSolid(cross)){
-	    newmatid=mat[m].ID();
-	    newindex=mat[m].Index();
-	    newattlen=mat[m].AttLen();
-	    newscatlen=mat[m].ScatLen();
-	    btype=mat[m].Type();
+	else if(matid!=0&&matid<mat[m]->ID()&&btype==-1){
+	  if(mat[m]->InSolid(cross)){
+	    newmatid=mat[m]->ID();
+	    newindex=mat[m]->Index();
+	    newattlen=mat[m]->AttLen();
+	    newscatlen=mat[m]->ScatLen();
+	    btype=mat[m]->Type();
 	    newmn=m;
 	    goto ENDLOOP;
 	  }
 	  continue;
 	}
-	for(int t=0;t<mat[m].NTriangle();t++){//loop for Triangles
-	  if(mat[m].GetTriangle(t).Collision(pos,cross,cand)){//Check if a line between two points collides with the triangle or not
+	for(int t=0;t<mat[m]->NTriangle();t++){//loop for Triangles
+	  if(mat[m]->GetTriangle(t).Collision(pos,cross,cand)){//Check if a line between two points collides with the triangle or not
 	    for(int j=0;j<3;j++){
 	      newpos[j]=cand[j];
 	      if(matid==0){
 		cross[j]=cand[j];
 	      }
-	      else if(matid==mat[m].ID()){
+	      else if(matid==mat[m]->ID()){
 		cross[j]=cand[j]+vec[j]*micro;
 	      }
 	      else{
 		cross[j]=cand[j]-vec[j]*micro;
 	      }
 	    }
-	    mat[m].GetTriangle(t).GetNormal(normal);
-	    if(matid==mat[m].ID()){
+	    mat[m]->GetTriangle(t).GetNormal(normal);
+	    if(matid==mat[m]->ID()){
 	      newmatid=0;
 	      newindex=index0;
 	      newattlen=0;
@@ -115,11 +111,11 @@ void Simulator::Run(){//Run simulation
 	      newmn=-1;
 	    }
 	    else{
-	      newmatid=mat[m].ID();
-	      newindex=mat[m].Index();
-	      newattlen=mat[m].AttLen();
-	      newscatlen=mat[m].ScatLen();
-	      btype=mat[m].Type();
+	      newmatid=mat[m]->ID();
+	      newindex=mat[m]->Index();
+	      newattlen=mat[m]->AttLen();
+	      newscatlen=mat[m]->ScatLen();
+	      btype=mat[m]->Type();
 	      newmn=m;
 	    }
 	  }//end of if
@@ -221,16 +217,16 @@ void Simulator::Display(){//Event display mode
   x_min = y_min = z_min = world;
   x_max = y_max = z_max = -world;
   for(unsigned int m=0;m<mat.size();m++){//loop for Materials
-    for(int t=0;t<mat[m].NTriangle();t++){//loop for Triangles
+    for(int t=0;t<mat[m]->NTriangle();t++){//loop for Triangles
 	for(int j=0;j<3;j++){
-	  vtx[j][0]=mat[m].GetTriangle(t).X(j);
-	  vtx[j][1]=mat[m].GetTriangle(t).Y(j);
-	  vtx[j][2]=mat[m].GetTriangle(t).Z(j);
+	  vtx[j][0]=mat[m]->GetTriangle(t).X(j);
+	  vtx[j][1]=mat[m]->GetTriangle(t).Y(j);
+	  vtx[j][2]=mat[m]->GetTriangle(t).Z(j);
 	  Compare(x_max, x_min, vtx[j][0]);
 	  Compare(y_max, y_min, vtx[j][1]);
 	  Compare(z_max, z_min, vtx[j][2]);
 	}//end of for
-	Draw(vtx,mat[m].Type());
+	Draw(vtx,mat[m]->Type());
     }//end of for
   }//end of for
   r_max = (x_max-x_min > y_max-y_min) ? x_max-x_min : y_max-y_min;
@@ -278,7 +274,7 @@ void Simulator::Display(){//Event display mode
 }
 int Simulator::PointMaterial(double p[3]){//Check the material of initial position
   for(unsigned int m=0;m<mat.size();m++){
-    if(mat[m].InSolid(p)){
+    if(mat[m]->InSolid(p)){
       return m;
     }
   }

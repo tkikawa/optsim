@@ -1,9 +1,8 @@
 #include "Source.hh"
 
 Source::Source(std::mt19937 MT, Config config)
+  : Geometry(MT)
 {
-  mt = MT;
-
   if(config["Source"].size()==0){
     std::cerr<<"Error: Souce is not defined in the input card file."<<std::endl;
     exit(1);
@@ -90,7 +89,7 @@ Source::Source(std::mt19937 MT, Config config)
   else{
     cosp=1;
   }
-  if(v_y){
+  if(v_y >= 0){
     sinp=sqrt(1-cosp*cosp);
   }
   else{

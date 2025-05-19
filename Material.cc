@@ -1,17 +1,17 @@
 #include "Material.hh"
 
 Material::Material(std::mt19937 MT, int ID, std::string MATFILE, std::string TYPE, double INDEX=1, double ATTLEN=0, double SCATLEN=0)
+  : Geometry(MT),
+    id(ID),
+    index(INDEX),
+    attlen(ATTLEN),
+    scatlen(SCATLEN)
 {
-  mt = MT;
-  id = ID;
   if(id<=0){
     std::cerr<<"Error: Matrial ID is invalid."<<std::endl;
     std::cerr<<"Material ID must be positive integer."<<std::endl;
     exit(1);
   }
-  index = INDEX;
-  attlen = ATTLEN;
-  scatlen = SCATLEN;
   if(TYPE=="medium")         type = 0;
   else if(TYPE=="converter") type = 1;
   else if(TYPE=="mirror")    type = 2;
