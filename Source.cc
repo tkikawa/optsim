@@ -1,7 +1,8 @@
 #include "Source.hh"
 
-Source::Source(std::mt19937 MT, Config config)
-  : Geometry(MT)
+Source::Source(std::mt19937 MT, Config config, std::vector<Material*> &MAT)
+  : Geometry(MT),
+    mat(MAT)
 {
   if(config["Source"].size()==0){
     std::cerr<<"Error: Souce is not defined in the input card file."<<std::endl;

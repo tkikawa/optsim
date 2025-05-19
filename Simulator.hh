@@ -39,8 +39,8 @@ private:
   std::mt19937 mt;
   std::uniform_real_distribution<double> unirand;
   std::string output;
+  Source *src;  
   std::vector<Material*> mat;
-  Source *src;
   int nevt;
   double index0;
   double pos[3],vec[3],cross[3],cand[3],newpos[3],newvec[3],normal[3],index,newindex,attlen,newattlen,scatlen,newscatlen;

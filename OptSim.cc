@@ -89,9 +89,6 @@ int main(int argc, char *argv[])
     mt.seed(rnd());
   }
 
-  std::cout<<"Loading source data."<<std::endl;
-  Source *src = new Source(mt,config);
-
   std::cout<<"Loading material data."<<std::endl;
   std::vector<Material*> materials;
   std::string matfile, type;
@@ -113,6 +110,9 @@ int main(int argc, char *argv[])
     materials.push_back(mat);
   }
 
+  std::cout<<"Loading source data."<<std::endl;
+  Source *src = new Source(mt,config,materials);
+  
   std::cout<<"Setting up simulator."<<std::endl;
   Simulator *sim = new Simulator(mt,config,output,src,materials);
   
