@@ -1,8 +1,10 @@
 #ifndef Simulator_h
 #define Simulator_h 1
 
+#include "Global.hh"
 #include "Source.hh"
 #include "Material.hh"
+#include "Charged.hh"
 #include <string>
 #include <iostream>
 #include <vector>
@@ -23,27 +25,31 @@ public:
   void Display();
   
 private:
-  int PointMaterial(double p[3]);
+  int PointMaterial(const Position& p);
   void Initialize();
   int FType(int bt);
   void Summary();
-  bool Fresnel(double v[3], double *newv, double norm[3], double idx_in, double idx_out);
-  void Specular(double v[3], double *newv, double norm[3]);
-  void Lambert(double v[3], double *newv, double norm[3]);
-  void Rayleigh(double v[3], double *newv);
+  bool Fresnel(const Direction& v, Direction& newv, Direction norm, double idx_in, double idx_out);
+  void Specular(const Direction& v, Direction& newv, const Direction& norm);
+  void Lambert(const Direction& v, Direction& newv, Direction norm);
+  void Rayleigh(const Direction& v, Direction& newv);
   void Draw(double vtx[3][3], int type);
-  void Track(double p0[3], double p1[3]);
+  void Track(const Position& p0, const Position& p1, bool charged = false);
   void Compare(double &A_max, double &A_min, double A);
-  void Normalize(double *v);
-  void Isotropic(double *v);
+  void Normalize(Direction& v);
+  void Isotropic(Direction& v);
   std::mt19937 mt;
   std::uniform_real_distribution<double> unirand;
   std::string output;
-  Source *src;  
+  Source *src;
+  Charged *chg;
   std::vector<Material*> mat;
   int nevt;
+  int nph;
   double index0;
-  double pos[3],vec[3],cross[3],cand[3],newpos[3],newvec[3],normal[3],index,newindex,attlen,newattlen,scatlen,newscatlen;
+  Position pos,vec,cross,cand,newpos;
+  Direction newvec,normal;
+  double index,newindex,attlen,newattlen,scatlen,newscatlen;
   int matid, newmatid, btype, mn, newmn;
   double pl,apl,spl;
   bool displaymode;

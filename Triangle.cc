@@ -19,7 +19,7 @@ Triangle::Triangle(double vtx[3][3])
 Triangle::~Triangle()
 {
 }
-bool Triangle::Collision(double s[3], double t[3], double *p){//Check if a line between two points crosses the triangle or not.
+bool Triangle::Collision(const Position& s, const Position& t, Position& p){//Check if a line between two points crosses the triangle or not.
   if((a*s[0]+b*s[1]+c*s[2]+d)*(a*t[0]+b*t[1]+c*t[2]+d)>=0)
     return false;//Check if the two points are in difference sides of the triangle plane
   double cp1,cp2,cp3;// Cross products
@@ -47,7 +47,8 @@ bool Triangle::Collision(double s[3], double t[3], double *p){//Check if a line 
   else
     return true;
 }
-void Triangle::GetSurfPoint(double *p, double r1, double r2){//Randomely determined a point in the triangle surface.
+Position Triangle::GetSurfPoint(double r1, double r2){//Randomely determined a point in the triangle surface.
+  Position p;
   double t1=sqrt(r1);
   double t2=1-t1;
   double s1=r2;
@@ -62,9 +63,8 @@ void Triangle::GetSurfPoint(double *p, double r1, double r2){//Randomely determi
   p[0]=xtmp[0]*s1+xtmp[1]*s2;
   p[1]=ytmp[0]*s1+ytmp[1]*s2;
   p[2]=ztmp[0]*s1+ztmp[1]*s2;
+  return p;
 }
-void Triangle::GetNormal(double *norm){//Get normal vector of the triangle plane.
-  for(int i=0;i<3;i++){
-    norm[i]=normal[i];
-  }
+Direction Triangle::GetNormal(){//Get normal vector of the triangle plane.
+  return normal;
 }

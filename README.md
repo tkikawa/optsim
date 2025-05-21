@@ -134,8 +134,13 @@ Material geometry information. Material ID, location of the CAD-file and materia
 - **detector**: The behavior in the simulation is the same as absorber but is tagged as detected in the output ROOT file.
 ![Material of overlapped region](figures/overlap.png)
 
+### Particle
+Type of generated primary particles
+- **photon**: Optical photons are produced as primary particles.
+- **charged**: Charged particles are produced as primary particles. (Scintillation or Cherenkov needs to be activated for any material to simulate behaviours of generated optical photons.)
+
 ### Source
-Initial positional distribution of the generated optical photons.
+Initial positional distribution of the generated primary particles (optical photons or charged particles).
 Following source modes are available.
 - **CADvolume**: Source volume is given by a CAD file. Photons are uniformly created in the space completely surrounded by surface of the CAD file.
 - **CADsurface**: Starting points are on triangles whose vertices are all in the given CAD-volume.
@@ -144,7 +149,7 @@ Following source modes are available.
 - **cylsurface**: Photon starting values are uniformly diced in the surface of cylinder with the given parameter range (r,phi,z).
 
 ### Direction
-Initial directional distribution of the generated optical photons.
+Initial directional distribution of the generated primary particles (optical photons or charged particles).
 Following direction modes are available.
 - **isotropic**: Photons are emitted isotropically.
 - **flat**: Photons are directionally emitted with a divergence angle of flat distribution (v_x, v_y, v_z, phi).

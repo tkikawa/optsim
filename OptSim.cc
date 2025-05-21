@@ -15,6 +15,7 @@
 #include <sys/time.h>
 #include <TApplication.h>
 #include "Global.hh"
+#include "Charged.hh"
 #include "Geometry.hh"
 #include "Material.hh"
 #include "Source.hh"
@@ -89,29 +90,32 @@ int main(int argc, char *argv[])
     mt.seed(rnd());
   }
 
+  std::cout<<"Loading source data."<<std::endl;
+  Source *src = new Source(mt,config);
+  
   std::cout<<"Loading material data."<<std::endl;
   std::vector<Material*> materials;
   std::string matfile, type;
   int id;
-  double index, attlen, scatlen;
+  double index, attlen, scatlen, sciprob, cheprob;
   for(std::map<std::string, std::string>::iterator i = config["Material"].begin(); i != config["Material"].end(); i++){
     std::istringstream(i->first) >> id;
     std::istringstream ss(i->second);
     ss >> matfile >> type;
     if(type=="medium" || type=="converter"){
-      ss >> index >> attlen >> scatlen;
+      index=0; attlen=0; scatlen=0; sciprob=0; cheprob=0;
+      ss >> index >> attlen >> scatlen >> sciprob >> cheprob;
     }
     else{
       index=1;
       attlen=0;
       scatlen=0;
+      sciprob=0;
+      cheprob=0;
     }
-    Material *mat = new Material(mt,id, matfile, type, index, attlen, scatlen);
+    Material *mat = new Material(mt,id, matfile, type, index, attlen, scatlen,sciprob,cheprob);
     materials.push_back(mat);
   }
-
-  std::cout<<"Loading source data."<<std::endl;
-  Source *src = new Source(mt,config,materials);
   
   std::cout<<"Setting up simulator."<<std::endl;
   Simulator *sim = new Simulator(mt,config,output,src,materials);

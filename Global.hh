@@ -19,6 +19,10 @@ static const double vsize=1000;//Vertical size of event display
 
 typedef std::map<std::string, std::map<std::string, std::string> > Config;
 
+using Position = std::array<double, 3>;
+using Direction = std::array<double, 3>;
+
+
 void ReadInFile(const char *inpath, Config &vars);//Read variables from input card file into map
 
 #endif

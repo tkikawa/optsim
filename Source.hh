@@ -8,31 +8,32 @@
 #include <math.h>
 #include "Global.hh"
 #include "Geometry.hh"
-#include "Material.hh"
 
 
 class Source : public Geometry
 {
 public:
-  Source(std::mt19937 MT, Config config, std::vector<Material*> &MAT);
+  Source(std::mt19937 MT, Config config);
   virtual ~Source();
-  void Generate(double *pos, double *vec);
-  void PointInSource(double *pos);
-  void Direction(double *vec);
+  void Generate(Position& pos, Direction& vec);
+  Position PointInSource();
+  Direction ParticleDir();
+  bool ChargedMode();
 
 private:
   void Compare(double &A_max, double &A_min, double A);
   void Normalize(double &vx, double &vy, double &xz);
-  std::vector<Material*> mat;
   std::string sourcemode;
+  std::string particlemode;
   std::string directionmode;
+  bool charged;
   double x_min, x_max, y_min, y_max, z_min, z_max;
   double r_min, r_max, phi_min, phi_max;
   double topsurf, insurf, outsurf, totsurf;
   std::string sourcefile;
   double v_x, v_y, v_z, phi;
   double cost,sint,cosp,sinp;
-  double v[3],rz,vr,ang;
+  double rz,vr,ang;
 };
 
 #endif

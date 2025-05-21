@@ -1,8 +1,7 @@
 #include "Source.hh"
 
-Source::Source(std::mt19937 MT, Config config, std::vector<Material*> &MAT)
-  : Geometry(MT),
-    mat(MAT)
+Source::Source(std::mt19937 MT, Config config)
+  : Geometry(MT)
 {
   if(config["Source"].size()==0){
     std::cerr<<"Error: Souce is not defined in the input card file."<<std::endl;
@@ -55,6 +54,24 @@ Source::Source(std::mt19937 MT, Config config, std::vector<Material*> &MAT)
     exit(1);
   }
 
+  if(config["Particle"].size()==0){
+    std::cerr<<"Error: Particle is not defined in the input card file."<<std::endl;
+    exit(1);
+  }  
+  particlemode = config["Particle"].begin()->first; // only first particle in input card file is read in
+  std::cout<<"Particle type is "<<particlemode<<std::endl;  
+  if (particlemode == "photon"){
+    charged = false;
+  }
+  else if (particlemode == "charged"){
+    charged = true;
+  }
+  else{
+    std::cerr<<"Error: Invalid particle type."<<std::endl;
+    std::cerr<<"Particle type must be either photon or charged."<<std::endl;
+    exit(1);
+  }
+
   if(config["Direction"].size()==0){
     std::cerr<<"Error: Direction is not defined in the input card file."<<std::endl;
     exit(1);
@@ -102,14 +119,15 @@ Source::Source(std::mt19937 MT, Config config, std::vector<Material*> &MAT)
 Source::~Source()
 {
 }
-void Source::Generate(double *pos, double *vec)
+void Source::Generate(Position& pos, Direction& vec)
 {
-  PointInSource(pos);
-  Direction(vec);
+  pos=PointInSource();
+  vec=ParticleDir();
 }
-void Source::PointInSource(double *pos){//Randomely determine a point in the source volume or surface.
+Position Source::PointInSource(){//Randomely determine a point in the source volume or surface.
   
   double r, phi_r;
+  Position pos;
 
   if (sourcemode == "boxvolume"){
     pos[0] = x_min + unirand(mt)*(x_max - x_min);
@@ -161,7 +179,7 @@ void Source::PointInSource(double *pos){//Randomely determine a point in the sou
       if(randsurf < tmpsurf){
 	double r1=unirand(mt);
 	double r2=unirand(mt);
-	triangle[i].GetSurfPoint(pos,r1,r2);
+	pos = triangle[i].GetSurfPoint(r1,r2);
 	break;
       }
     }
@@ -174,12 +192,14 @@ void Source::PointInSource(double *pos){//Randomely determine a point in the sou
       if(InSolid(pos))break;
     }
   }
+  return pos;
 }
-void Source::Direction(double *vec){//Randomely determine the initial direction of the optical photon.
+Direction Source::ParticleDir(){//Randomely determine the initial direction of the primary particle
+  Direction vec,v;
   if (directionmode == "isotropic" || directionmode == "flat"){
     v[2]=1+unirand(mt)*(rz-1);
   }
-  else if (directionmode == "gauss"){
+  else{//directionmode == "gauss"
     v[2]=-2;
     while(v[2]<-1){
       v[2]=1+fabs(gausrand(mt))*(rz-1);
@@ -192,6 +212,10 @@ void Source::Direction(double *vec){//Randomely determine the initial direction 
   vec[0]=-sinp*v[0] +cost*cosp*v[1] +sint*cosp*v[2];
   vec[1]=cosp*v[0]  +cost*sinp*v[1] +sint*sinp*v[2];
   vec[2]=           -sint*v[1]      +cost*v[2];
+  return vec;
+}
+bool Source::ChargedMode(){
+  return charged;
 }
 void Source::Compare(double &A_max, double &A_min, double A){//Update the minimum and maximum points of a coordinate.
   if(A_min > A) A_min = A;

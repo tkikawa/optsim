@@ -11,6 +11,7 @@ Simulator::Simulator(std::mt19937 MT, Config config, std::string OUTPUT, Source 
 {
   std::istringstream(config["Global"]["Number"]) >> nevt;
   std::istringstream(config["Global"]["Index"]) >> index0;
+  chg = new Charged(mt,mat);
 }
 Simulator::~Simulator()
 {
@@ -30,7 +31,12 @@ void Simulator::Run(){//Run simulation
   tree->Branch("nref",&nref,"nref/I");
   tree->Branch("npas",&npas,"npas/I");
   for(int j=0;j<5;j++)count[j]=0;
-  std::cout<<"Generate "<<nevt<<" optical photons."<<std::endl;
+  if(src->ChargedMode()){
+    std::cout<<"Generate "<<nevt<<" charged particles."<<std::endl;
+  }
+  else{
+    std::cout<<"Generate "<<nevt<<" optical photons."<<std::endl;
+  }
   bool progbar=false;
   if(nevt>=100&&!displaymode)progbar=true;
   if(progbar){
@@ -49,161 +55,179 @@ void Simulator::Run(){//Run simulation
 	std::cout<<"#"<<std::endl;
       }
     }
-    while(1){
-      src->Generate(pos, vec);//Determine the initial position and direction
-      mn=PointMaterial(pos);//Check the material of initial position
-      if(mn==-1)break;//Check if initial position of out of material volumes (i.e. air).
-      else if(mat[mn]->Type()<=1)break;//Check if the material type is medium or converter
+    if(src->ChargedMode()){
+      src->Generate(pos, vec);//Determine the initial position and direction of charged particle
+      if(displaymode){
+	for(int j=0;j<3;j++)cross[j]=pos[j]+vec[j]*world;
+	Track(pos,cross,1);
+      }
+      chg->Simulate(pos, vec);//Simualtion for charged particles.
+      nph=chg->GetNPhotons();
     }
-    if(mn!=-1){//Initial position is in the defined material volumes.
-      matid=mat[mn]->ID();
-      index=mat[mn]->Index();
-      attlen=mat[mn]->AttLen();
-      scatlen=mat[mn]->ScatLen();
-    }
-    else{//Initial position is out of the defined material volumes and is in surrounding (air).
-      matid=0;
-      index=index0;
-      attlen=0;
-      scatlen=0;
-    }
-    Initialize();
-    while(1){
-      btype = -2;
-      for(int j=0;j<3;j++)cross[j]=pos[j]+vec[j]*world;//far point on the straight-line of the track
-      for(unsigned int m=0;m<mat.size();m++){//loop for Materials
-	if(matid!=0&&matid<mat[m]->ID()&&btype>-1){
-	  goto ENDLOOP;
+    else nph=1;
+    for(int p=0;p<nph;p++){
+      if(src->ChargedMode()){
+	chg->Generate(pos, vec, p);//Determine the initial position and direction
+	mn=PointMaterial(pos);//Check the material of initial position
+      }
+      else{
+	while(1){
+	  src->Generate(pos, vec);//Determine the initial position and direction
+	  mn=PointMaterial(pos);//Check the material of initial position
+	  if(mn==-1)break;//Check if initial position of out of material volumes (i.e. air).
+	  else if(mat[mn]->Type()<=1)break;//Check if the material type is medium or converter
 	}
-	else if(matid!=0&&matid<mat[m]->ID()&&btype==-1){
-	  if(mat[m]->InSolid(cross)){
-	    newmatid=mat[m]->ID();
-	    newindex=mat[m]->Index();
-	    newattlen=mat[m]->AttLen();
-	    newscatlen=mat[m]->ScatLen();
-	    btype=mat[m]->Type();
-	    newmn=m;
+      }
+      if(mn!=-1){//Initial position is in the defined material volumes.
+	matid=mat[mn]->ID();
+	index=mat[mn]->Index();
+	attlen=mat[mn]->AttLen();
+	scatlen=mat[mn]->ScatLen();
+      }
+      else{//Initial position is out of the defined material volumes and is in surrounding (air).
+	matid=0;
+	index=index0;
+	attlen=0;
+	scatlen=0;
+      }
+      Initialize();
+      while(1){
+	btype = -2;
+	for(int j=0;j<3;j++)cross[j]=pos[j]+vec[j]*world;//far point on the straight-line of the track
+	for(unsigned int m=0;m<mat.size();m++){//loop for Materials
+	  if(matid!=0&&matid<mat[m]->ID()&&btype>-1){
 	    goto ENDLOOP;
 	  }
-	  continue;
-	}
-	for(int t=0;t<mat[m]->NTriangle();t++){//loop for Triangles
-	  if(mat[m]->GetTriangle(t).Collision(pos,cross,cand)){//Check if a line between two points collides with the triangle or not
-	    for(int j=0;j<3;j++){
-	      newpos[j]=cand[j];
-	      if(matid==0){
-		cross[j]=cand[j];
-	      }
-	      else if(matid==mat[m]->ID()){
-		cross[j]=cand[j]+vec[j]*micro;
-	      }
-	      else{
-		cross[j]=cand[j]-vec[j]*micro;
-	      }
-	    }
-	    mat[m]->GetTriangle(t).GetNormal(normal);
-	    if(matid==mat[m]->ID()){
-	      newmatid=0;
-	      newindex=index0;
-	      newattlen=0;
-	      newscatlen=0;
-	      btype=-1;
-	      newmn=-1;
-	    }
-	    else{
+	  else if(matid!=0&&matid<mat[m]->ID()&&btype==-1){
+	    if(mat[m]->InSolid(cross)){
 	      newmatid=mat[m]->ID();
 	      newindex=mat[m]->Index();
 	      newattlen=mat[m]->AttLen();
 	      newscatlen=mat[m]->ScatLen();
 	      btype=mat[m]->Type();
 	      newmn=m;
+	      goto ENDLOOP;
 	    }
-	  }//end of if
+	    continue;
+	  }
+	  for(int t=0;t<mat[m]->NTriangle();t++){//loop for Triangles
+	    if(mat[m]->GetTriangle(t).Collision(pos,cross,cand)){//Check if a line between two points collides with the triangle or not
+	      for(int j=0;j<3;j++){
+		newpos[j]=cand[j];
+		if(matid==0){
+		  cross[j]=cand[j];
+		}
+		else if(matid==mat[m]->ID()){
+		  cross[j]=cand[j]+vec[j]*micro;
+		}
+		else{
+		  cross[j]=cand[j]-vec[j]*micro;
+		}
+	      }
+	      normal=mat[m]->GetTriangle(t).GetNormal();
+	      if(matid==mat[m]->ID()){
+		newmatid=0;
+		newindex=index0;
+		newattlen=0;
+		newscatlen=0;
+		btype=-1;
+		newmn=-1;
+	      }
+	      else{
+		newmatid=mat[m]->ID();
+		newindex=mat[m]->Index();
+		newattlen=mat[m]->AttLen();
+		newscatlen=mat[m]->ScatLen();
+		btype=mat[m]->Type();
+		newmn=m;
+	      }
+	    }//end of if
+	  }//end of for
 	}//end of for
-      }//end of for
-      
-    ENDLOOP:
-      if(btype!=-2){
-	pl=sqrt(pow(newpos[0]-pos[0],2)+pow(newpos[1]-pos[1],2)+pow(newpos[2]-pos[2],2));
-	if(attlen>0||scatlen>0){//When attlen==0 (scatlen==0), absorption (scattering) in the medium does not occur.
-	  if(attlen>0)apl=-attlen*log(unirand(mt));
-	  else apl=DBL_MAX;
-	  if(scatlen>0)spl=-scatlen*log(unirand(mt));
-	  else spl=DBL_MAX;
-	  if(apl<pl || spl<pl){
-	    if(apl<spl){//Absorption in the medium
-	      pl=apl;
-	      btype=-3;
+ 
+      ENDLOOP:
+	if(btype!=-2){
+	  pl=sqrt(pow(newpos[0]-pos[0],2)+pow(newpos[1]-pos[1],2)+pow(newpos[2]-pos[2],2));
+	  if(attlen>0||scatlen>0){//When attlen==0 (scatlen==0), absorption (scattering) in the medium does not occur.
+	    if(attlen>0)apl=-attlen*log(unirand(mt));
+	    else apl=DBL_MAX;
+	    if(scatlen>0)spl=-scatlen*log(unirand(mt));
+	    else spl=DBL_MAX;
+	    if(apl<pl || spl<pl){
+	      if(apl<spl){//Absorption in the medium
+		pl=apl;
+		btype=-3;
+	      }
+	      else{//Rayleigh scattering in the medium
+		pl=spl;
+		btype=4;
+		Rayleigh(vec,newvec);
+	      }
+	      for(int j=0;j<3;j++){
+		newpos[j]=pos[j]+vec[j]*pl;
+	      }
 	    }
-	    else{//Rayleigh scattering in the medium
-	      pl=spl;
-	      btype=4;
-	      Rayleigh(vec,newvec);
-	    }
+	  }
+	  length+=pl;
+	  time+=pl/c_0*index;
+	  if(displaymode){
+	    Track(pos,newpos);
+	  }
+	}
+	else{
+	  if(displaymode){
 	    for(int j=0;j<3;j++){
-	      newpos[j]=pos[j]+vec[j]*pl;
+	      cand[j]=pos[j]+vec[j]*world*2;
+	    }
+	    Track(pos,cand);
+	  }
+	}
+	if(btype >= -1 && btype <4){
+	  if(btype <= 1){
+	    if(Fresnel(vec,newvec,normal,index,newindex)){//Determine if the optical photon is reflected or transmitted with refraction following the Fresnel equation
+	      mn=newmn;
+	      matid=newmatid;
+	      index=newindex;
+	      attlen=newattlen;
+	      scatlen=newscatlen;
+	      npas++;
+	      if(btype == 1){//Isotropic scattering for converter
+		Isotropic(newvec);
+	      }
+	    }
+	    else{
+	      nref++;
 	    }
 	  }
-	}
-	length+=pl;
-	time+=pl/c_0*index;
-	if(displaymode){
-	  Track(pos,newpos);
-	}
-      }
-      else{
-	if(displaymode){
-	  for(int j=0;j<3;j++){
-	    cand[j]=pos[j]+vec[j]*world*2;
-	  }
-	  Track(pos,cand);
-	}
-      }
-      if(btype >= -1 && btype <=4){
-	if(btype <= 1){
-	  if(Fresnel(vec,newvec,normal,index,newindex)){//Determine if the optical photon is reflected or transmitted with refraction following the Fresnel equation
-	    mn=newmn;
-	    matid=newmatid;
-	    index=newindex;
-	    attlen=newattlen;
-	    scatlen=newscatlen;
-	    npas++;
-	    if(btype == 1){//Isotropic scattering for converter
-	      Isotropic(newvec);
-	    }
-	  }
-	  else{
+	  else if(btype == 2){
+	    Specular(vec,newvec,normal);//Specular reflection
 	    nref++;
 	  }
+	  else if(btype == 3){
+	    Lambert(vec,newvec,normal);//Diffusion following the Lambert's cosine law
+	    nref++;
+	  }
+	  Normalize(newvec);
+	  for(int j=0;j<3;j++){
+	    pos[j]=newpos[j]+newvec[j]*nano;
+	    vec[j]=newvec[j];
+	  }
 	}
-	else if(btype == 2){
-	  Specular(vec,newvec,normal);//Specular reflection
-	  nref++;
+	else break;//Absorbed, detected or go out of world volume.
+	if(nref>nreflimit){
+	  btype=-4;
+	  break;
 	}
-	else if(btype == 3){
-	  Lambert(vec,newvec,normal);//Diffusion following the Lambert's cosine law
-	  nref++;
-	}
-	Normalize(newvec);
-	for(int j=0;j<3;j++){
-	  pos[j]=newpos[j]+newvec[j]*nano;
-	  vec[j]=newvec[j];
-	}
+      }//end of while
+      for(int j=0;j<3;j++){
+	fpos[j]=newpos[j];
+	fvec[j]=newvec[j];
       }
-      else break;//Absorbed, detected or go out of world volume.
-      if(nref>nreflimit){
-	btype=-4;
-	break;
-      }
-    }//end of while
-    for(int j=0;j<3;j++){
-      fpos[j]=newpos[j];
-      fvec[j]=newvec[j];
-    }
-    fmat=newmatid;
-    ftype=FType(btype);//Conversion of type ID.
-    tree->Fill();
-    count[ftype]++;
+      fmat=newmatid;
+      ftype=FType(btype);//Conversion of type ID.
+      tree->Fill();
+      count[ftype]++;
+    }//end of for
   }//end of for
   Summary();  
   file->Write();
@@ -272,7 +296,7 @@ void Simulator::Display(){//Event display mode
   }
   c1->Close();
 }
-int Simulator::PointMaterial(double p[3]){//Check the material of initial position
+int Simulator::PointMaterial(const Position& p){//Check the material of initial position
   for(unsigned int m=0;m<mat.size();m++){
     if(mat[m]->InSolid(p)){
       return m;
@@ -311,7 +335,7 @@ void Simulator::Summary(){//Display the summary of simulation
   std::cout<<"Absorbed by absorber       : "<<count[3]<<std::endl;
   std::cout<<"Detected by detector       : "<<count[4]<<std::endl;
 }
-bool Simulator::Fresnel(double v[3], double *newv, double norm[3], double idx_in, double idx_out){//Determine if the optical photon is reflected or transmitted with refraction following the Fresnel equation
+bool Simulator::Fresnel(const Direction& v, Direction& newv, Direction norm, double idx_in, double idx_out){//Determine if the optical photon is reflected or transmitted with refraction following the Fresnel equation
   double idx_ratio=idx_out/idx_in;
   double cos_in=v[0]*norm[0]+v[1]*norm[1]+v[2]*norm[2];
   double sin_in=sqrt(1-cos_in*cos_in);
@@ -350,13 +374,13 @@ bool Simulator::Fresnel(double v[3], double *newv, double norm[3], double idx_in
     }
   } 
 }
-void Simulator::Specular(double v[3], double *newv, double norm[3]){//Specular reflection
+void Simulator::Specular(const Direction& v, Direction& newv, const Direction& norm){//Specular reflection
   double cp=v[0]*norm[0]+v[1]*norm[1]+v[2]*norm[2];
   for(int i=0;i<3;i++){
     newv[i]=v[i]-2*norm[i]*cp;
   }
 }
-void Simulator::Lambert(double v[3], double *newv, double norm[3]){//Diffusion following the Lambert's cosine law
+void Simulator::Lambert(const Direction& v, Direction& newv, Direction norm){//Diffusion following the Lambert's cosine law
   double cp=v[0]*norm[0]+v[1]*norm[1]+v[2]*norm[2];
   if(cp>0){
     for(int i=0;i<3;i++){
@@ -391,7 +415,7 @@ void Simulator::Lambert(double v[3], double *newv, double norm[3]){//Diffusion f
   newv[1]=cosp*ranv[0]  +cost*sinp*ranv[1] +sint*sinp*ranv[2];
   newv[2]=              -sint*ranv[1]      +cost*ranv[2];
 }
-void Simulator::Rayleigh(double v[3], double *newv){//Rayleigh scattering in the medium
+void Simulator::Rayleigh(const Direction& v, Direction& newv){//Rayleigh scattering in the medium
   if(unirand(mt)<2./3.){//Angle-independent term
     Isotropic(newv);
   }
@@ -442,25 +466,31 @@ void Simulator::Draw(double vtx[3][3], int type){//Draw materials in the event d
   else if(type==5)l->SetLineColor(4);
   l->Draw();
 }
-void Simulator::Track(double p0[3],double p1[3]){//Draw track of optical photon in the event display
+void Simulator::Track(const Position& p0, const Position& p1, bool charged){//Draw track of optical photon in the event display
   TPolyLine3D *l = new TPolyLine3D(2);
   l->SetPoint(0,p0[0],p0[1],p0[2]);
   l->SetPoint(1,p1[0],p1[1],p1[2]);
-  l->SetLineColor(1);
-  l->SetLineWidth(2);
+  if(charged){
+    l->SetLineColor(2);
+    l->SetLineWidth(3);
+  }
+  else{
+    l->SetLineColor(1);
+    l->SetLineWidth(2);
+  }
   l->Draw();
 }
 void Simulator::Compare(double &A_max, double &A_min, double A){//Update the minimum and maximum points of a coordinate
   if(A_min > A) A_min = A;
   if(A_max < A) A_max = A;
 }
-void Simulator::Normalize(double *v){//Normalize the vector norm.
+void Simulator::Normalize(Direction& v){//Normalize the vector norm.
   double norm=v[0]*v[0]+v[1]*v[1]+v[2]*v[2];
   for(int i=0;i<3;i++){
     v[i]/=norm;
   }
 }
-void Simulator::Isotropic(double *v){//Rndomely and isotropically determine the direction
+void Simulator::Isotropic(Direction& v){//Randomely and isotropically determine the direction
   v[2]=1-2*unirand(mt);
   double ang=unirand(mt)*2*pi;
   double vr=sqrt(1-v[2]*v[2]);

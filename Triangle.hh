@@ -21,12 +21,13 @@ public:
   double C(){return c;}
   double D(){return d;}
   double GetArea(){return area;}
-  bool Collision(double s[3], double t[3], double *p);
-  void GetSurfPoint(double *p, double r1, double r2);
-  void GetNormal(double *norm);
+  bool Collision(const Position& s, const Position& t, Position& p);
+  Position GetSurfPoint(double r1, double r2);
+  Direction GetNormal();
 
 private:
-  double vertex[3][3],normal[3];
+  double vertex[3][3];
+  Direction normal;
   double a,b,c,d;// Plane equation: ax+by+cz+d=0
   double area;// Surface area
 };

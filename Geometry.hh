@@ -20,7 +20,7 @@ public:
   void LoadCAD(std::string name);
   int NTriangle(){return triangle.size();}
   Triangle GetTriangle(int n){return triangle[n];}
-  bool InSolid(double pos[3]);
+  bool InSolid(const Position& pos);
   std::mt19937 mt;
   std::vector<Triangle> triangle;
   std::uniform_real_distribution<double> unirand;

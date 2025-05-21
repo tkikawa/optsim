@@ -42,8 +42,8 @@ void Geometry::LoadCAD(std::string name){//Read out the input CAD file as a asse
   }
   
 }
-bool Geometry::InSolid(double pos[3]){//Check if the point is inside or outside of the geometry.
-  double far[3],tmp[3];
+bool Geometry::InSolid(const Position& pos){//Check if the point is inside or outside of the geometry.
+  Position far, tmp;
   far[0]=pos[0]; far[1]=pos[1]; far[2]=world;
   int ncol = 0;
   for(unsigned int i=0; i < triangle.size(); i++){

@@ -1,5 +1,5 @@
 [Global]
-#Number of generated optical photons to be simulated
+#Number of generated primaty particles to be simulated
 Number 100000
 #Refractive index of surroundings (air)
 Index 1.0
@@ -12,6 +12,20 @@ Index 1.0
 4       examples/simple/mirror.stl		mirror
 5       examples/simple/absorber.stl		absorber
 6       examples/simple/mppc.stl		detector
+
+#example of active material for charged particle simulation
+#ID	CADfile	    	      	  	  	material_type	refractive_index	attnuation_length(mm)	scattering_length(mm)	scintillation_probability(photon/mm)	cherekov_probability(photons/mm)
+#1	examples/simple/scintillator.stl	medium		1.592			100			0			3					0.3
+
+[Particle]
+########### particle modes #############
+# photon: photons are generated in the first step
+# charged: charged particles are generated in the first step
+#########################################
+
+photon
+
+#charged
 
 [Source]
 ############ source modes ###############
@@ -39,9 +53,9 @@ CADvolume 	examples/simple/scintillator.stl
 
 [Direction]
 ########### direction modes #############
-# isotropic: photons are emmitted isotropically
-# flat: photons are directionally emitted with a divergence angle of flat distribution (v_x, v_y, v_z, phi)
-# gauss: photons are directionally emitted with a divergence angle of Gaussian distribution (v_x, v_y, v_z, phi)
+# isotropic: photons or charged particles are emmitted isotropically
+# flat: photons or charged particles are directionally emitted with a divergence angle of flat distribution (v_x, v_y, v_z, phi)
+# gauss: photons or charged particles are directionally emitted with a divergence angle of Gaussian distribution (v_x, v_y, v_z, phi)
 #########################################
 
 isotropic
