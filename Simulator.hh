@@ -33,9 +33,12 @@ private:
   void Specular(const Direction& v, Direction& newv, const Direction& norm);
   void Lambert(const Direction& v, Direction& newv, Direction norm);
   void Rayleigh(const Direction& v, Direction& newv);
-  void Draw(double vtx[3][3], int type);
+  void Draw(const Position& p0, const Position& p1, int type);
   void Track(const Position& p0, const Position& p1, bool charged = false);
   void Compare(double &A_max, double &A_min, double A);
+  bool ComparePosition(const Position& p0, const Position& p1);
+  bool Parallel(const Direction& p0, const Direction& p1);
+  Position Round(const Position& p0);
   void Normalize(Direction& v);
   void Isotropic(Direction& v);
   std::mt19937 mt;

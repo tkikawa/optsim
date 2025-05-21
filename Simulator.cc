@@ -234,24 +234,31 @@ void Simulator::Run(){//Run simulation
   file->Close();  
 }
 void Simulator::Display(){//Event display mode
+  std::map<std::pair<Position, Position>, std::vector<Direction>> edge_to_norm;
   displaymode=true;
-  double vtx[3][3];
   TCanvas *c1 = new TCanvas("Event display","Event display",hsize,vsize);
   TView *view = TView::CreateView(1);
   x_min = y_min = z_min = world;
   x_max = y_max = z_max = -world;
   for(unsigned int m=0;m<mat.size();m++){//loop for Materials
+    edge_to_norm.clear();
     for(int t=0;t<mat[m]->NTriangle();t++){//loop for Triangles
-	for(int j=0;j<3;j++){
-	  vtx[j][0]=mat[m]->GetTriangle(t).X(j);
-	  vtx[j][1]=mat[m]->GetTriangle(t).Y(j);
-	  vtx[j][2]=mat[m]->GetTriangle(t).Z(j);
-	  Compare(x_max, x_min, vtx[j][0]);
-	  Compare(y_max, y_min, vtx[j][1]);
-	  Compare(z_max, z_min, vtx[j][2]);
-	}//end of for
-	Draw(vtx,mat[m]->Type());
+      for(int j=0;j<3;j++){
+	Position p1 = Round({ mat[m]->GetTriangle(t).X(j),       mat[m]->GetTriangle(t).Y(j),       mat[m]->GetTriangle(t).Z(j) });
+	Position p2 = Round({ mat[m]->GetTriangle(t).X((j+1)%3), mat[m]->GetTriangle(t).Y((j+1)%3), mat[m]->GetTriangle(t).Z((j+1)%3) });
+	if(ComparePosition(p1,p2))std::swap(p1, p2);
+	edge_to_norm[{p1, p2}].push_back(mat[m]->GetTriangle(t).GetNormal());
+	Compare(x_max, x_min, p1[0]);
+	Compare(y_max, y_min, p1[1]);
+	Compare(z_max, z_min, p1[2]);
+      }//end of for      
     }//end of for
+    for (auto it = edge_to_norm.begin(); it != edge_to_norm.end(); ++it) {
+      if (it->second.size() != 2) continue;
+      if (!Parallel(it->second[0], it->second[1])){
+	Draw(it->first.first,it->first.second,mat[m]->Type());
+      }
+    }
   }//end of for
   r_max = (x_max-x_min > y_max-y_min) ? x_max-x_min : y_max-y_min;
   r_max = (z_max-z_min > r_max) ? z_max-z_min : r_max;
@@ -452,12 +459,11 @@ void Simulator::Rayleigh(const Direction& v, Direction& newv){//Rayleigh scatter
   newv[2]=              -sint*ranv[1]      +cost*ranv[2];    
   }
 }
-void Simulator::Draw(double vtx[3][3], int type){//Draw materials in the event display
-  TPolyLine3D *l = new TPolyLine3D(3);
-  l->SetPoint(0,vtx[0][0],vtx[0][1],vtx[0][2]);
-  l->SetPoint(1,vtx[1][0],vtx[1][1],vtx[1][2]);
-  l->SetPoint(2,vtx[2][0],vtx[2][1],vtx[2][2]);
-  l->SetPoint(3,vtx[0][0],vtx[0][1],vtx[0][2]);
+void Simulator::Draw(const Position& p0, const Position& p1, int type){//Draw materials in the event display
+  TPolyLine3D *l = new TPolyLine3D(2);
+  l->SetPoint(0,p0[0],p0[1],p0[2]);
+  l->SetPoint(1,p1[0],p1[1],p1[2]);
+  l->SetPoint(0,p0[0],p0[1],p0[2]);
   if(type==0)     l->SetLineColor(2);
   else if(type==1)l->SetLineColor(6);
   else if(type==2)l->SetLineColor(5);
@@ -483,6 +489,23 @@ void Simulator::Track(const Position& p0, const Position& p1, bool charged){//Dr
 void Simulator::Compare(double &A_max, double &A_min, double A){//Update the minimum and maximum points of a coordinate
   if(A_min > A) A_min = A;
   if(A_max < A) A_max = A;
+}
+bool Simulator::ComparePosition(const Position& p0, const Position& p1){
+    for (int i = 0; i < 3; ++i) {
+        if (p0[i] != p1[i]) return p0[i] < p1[i];
+    }
+    return false;
+}
+bool Simulator::Parallel(const Direction& n0, const Direction& n1){
+  return fabs(n0[0]*n1[0] + n0[1]*n1[1] + n0[2]*n1[2]) > 0.999;
+}
+Position Simulator::Round(const Position& p0){
+  double eps = 1e-5;
+  return {
+	  std::round(p0[0] / eps) * eps,
+	  std::round(p0[1] / eps) * eps,
+	  std::round(p0[2] / eps) * eps
+  };
 }
 void Simulator::Normalize(Direction& v){//Normalize the vector norm.
   double norm=v[0]*v[0]+v[1]*v[1]+v[2]*v[2];
