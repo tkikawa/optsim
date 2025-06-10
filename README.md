@@ -166,7 +166,7 @@ Several parts of a SolidWorks assembly can be exported as follows:
 | Index         | Refractive index of surroundings (air)                           | 1        |
 | Mie           | Activate Mie scattering with asymmetric parameters               | inactive |
 | Scintillation | Activate scintillation with scinti_type and yield [photons/MeV]  | inactive |
-| Cherenkov     | Activate Cherenkov radiation with min. and max. wavelendths [nm] | inactive | 
+| Cherenkov     | Activate Cherenkov radiation with min. and max. wavelengths [nm] | inactive | 
 
 The generation of 1,000 primary particles with a refractive index of 1.0 for the surrounding medium, with activating the scintillation for NaI scintillation (yeild = 38000 photons/MeV) is defined as follows:
 
@@ -359,9 +359,11 @@ When the **particle mode is set to `photon`**, the following process is applied:
    * Inside each material, absorption or scattering is determined by the step length and material parameters.
    * This process repeats until the photon is absorbed or exits the world.
 
-### Charged Mode
+![Behavior of optical photon in the boundary](figures/boundary.png)
 
-When the **particle mode is set to `charged`**:
+### Charged Particle Mode
+
+When the **particle mode is set to `electron`, `muon`, `pion` or `proton`**:
 
 1. **Initial position and direction of each charged particle** are sampled according to the `[Source]` and `[Direction]` settings in the input card file.
 2. The passage of each charged particle through the geometry is simulated.
@@ -370,8 +372,6 @@ When the **particle mode is set to `charged`**:
 
    * **Initial position and direction** are determined according to the physical processes (e.g., random along the charged particle's path, appropriate angular distribution).
    * Each optical photon is then tracked through the geometry following the same procedure as in photon mode (steps 2 and onward above).
-
-![Behavior of optical photon in the boundary](figures/boundary.png)
 
 ---
 
