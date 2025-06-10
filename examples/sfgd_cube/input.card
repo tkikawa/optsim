@@ -10,6 +10,9 @@ Index 1.0
 4	examples/sfgd_cube/fibery.stl	detector
 5	examples/sfgd_cube/fiberz.stl	detector
 
+[Particle]
+photon
+
 [Source]
 CADvolume 	examples/sfgd_cube/scintillator.stl
 

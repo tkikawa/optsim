@@ -8,6 +8,9 @@ Index 1.0
 2	examples/lgp/lgp.stl	medium	1.592	5000	0
 3	examples/lgp/detector.stl		detector
 
+[Particle]
+photon
+
 [Source]
 CADvolume	examples/lgp/led.stl
 

@@ -1,21 +1,36 @@
 [Global]
 #Number of generated primaty particles to be simulated
-Number 100000
+Number 1000
+
 #Refractive index of surroundings (air)
 Index 1.0
+
+#Activate Mie scattering with the asymmetric parameter instead of Rayleigh scattering
+#Mie 0.8
+
+#Activate scintillation
+#Scintillation	scintillator_type photon_yield_per_energy [photons/MeV]
+#Scintillation	organic		  10000
+#Scintillation	NaI		  38000
+#Scintillation	CsI		  54000
+#Scintillation	BGO		  9000
+#Scintillation	LYSO		  32000
+#Scintillation	LaBr3		  63000
+
+#Activate Cherenkov radiation
+#Cherenkov  minimum_wavelength[nm]  maximum_wavelength[nm]
+#Cherenkov  300			    500
+
 
 [Material]
 #ID	CADfile					material_type	refractive_index	attnuation_length(mm)	scattering_length(mm)
 1       examples/simple/scintillator.stl	medium		1.592			100			0
+#1      examples/simple/scintillator.stl	scintillator	1.592			100			0
 2       examples/simple/fiber.stl		converter	1.592			3500			0
 3       examples/simple/reflector.stl		diffuser
 4       examples/simple/mirror.stl		mirror
 5       examples/simple/absorber.stl		absorber
 6       examples/simple/mppc.stl		detector
-
-#example of active material for charged particle simulation
-#ID	CADfile	    	      	  	  	material_type	refractive_index	attnuation_length(mm)	scattering_length(mm)	scintillation_probability(photon/mm)	cherekov_probability(photons/mm)
-#1	examples/simple/scintillator.stl	medium		1.592			100			0			3					0.3
 
 [Particle]
 ########### particle modes #############
@@ -25,43 +40,73 @@ Index 1.0
 
 photon
 
-#charged
+#charged_particle	energy(MeV)
+#electron 		1000
+#muon 			1000
+#pion 			1000
+#proton 		1000
 
 [Source]
 ############ source modes ###############
-# CADvolume: source volume is given by a CAD file, particles are created in the space completely surrounded by the CAD-surface
-# boxvolume: particle starting values are diced in the given parameter range (x,y,z)
-# cylvolume: particle starting values are diced in the given parameter range (r,phi,z)
-# CADsurface: starting values are on triangles whose vertices are all in the given CAD-volume
-# cylsurface: starting values are on triangles which have at least one vertex in the given parameter range (r,phi,z)
+# CADvolume: source volume is given by a CAD file, particles are created in the space completely surrounded by the CADsurface
+# CADsurface: starting values are on triangles whose vertices are all in the given CADvolume
+# boxvolume: particle starting values are diced in the given box volume (x,y,z)
+# boxsurface: particle starting values are diced in the give box surface (x,y,z)
+# cylvolume: particle starting values are diced in the given cylinder volume (r,phi,z)
+# cylsurface: particle starting values are diced in the given cylinder surface (r,phi,z)
+# sphvolume: particle starting values are diced in the given sphere volume (x, y, z, r)
+# sphsurface: particle starting values are diced in the given sphere surface (x, y, z, r)
+# custom: user's custom function defined in Global.cc
 #########################################
-
-#cylsurface	r_min	r_max	phi_min	phi_max	z_min	z_max
-#cylsurface	0.123	0.495	0	360	0.003	1.145
-
-#cylvolume	r_min	r_max	phi_min	phi_max	z_min	z_max
-#cylvolume	0.125	0.495	0	360	0.005	1.145
-
-#boxvolume	x_min	x_max	y_min	y_max	z_min	z_max
-#boxvolume	0	1	0	1	0	1
-
-#CADsurface	CAD-file
-#CADsurface 	examples/simple/scintillator.stl
 
 #CADvolume	CAD-file
 CADvolume 	examples/simple/scintillator.stl
 
+#CADsurface	CAD-file
+#CADsurface 	examples/simple/scintillator.stl
+
+#boxvolume	x_min	x_max	y_min	y_max	z_min	z_max
+#boxvolume	0	1	0	1	0	1
+
+#boxsurface	x_min	x_max	y_min	y_max	z_min	z_max
+#boxsurface	0	1	0	1	0	1
+
+#cylvolume	r_min	r_max	phi_min	phi_max	z_min	z_max
+#cylvolume	0.125	0.495	0	360	0.005	1.145
+
+#cylsurface	r_min	r_max	phi_min	phi_max	z_min	z_max
+#cylsurface	0.123	0.495	0	360	0.003	1.145
+
+#sphvolume	x_cen	y_cen	z_cen	r
+#sphvolume	0	0	5	5
+
+#sphsurface	x_cen	y_cen	z_cen	r
+#sphsurface	0	0	5	5
+
+#custom
+
 [Direction]
 ########### direction modes #############
-# isotropic: photons or charged particles are emmitted isotropically
-# flat: photons or charged particles are directionally emitted with a divergence angle of flat distribution (v_x, v_y, v_z, phi)
-# gauss: photons or charged particles are directionally emitted with a divergence angle of Gaussian distribution (v_x, v_y, v_z, phi)
+# isotropic: primary particles are isotropically emmitted
+# lambert: primary particles are directionally emitted with a probability proportional to the cosine of the angle from the surface normal (Lambertian emission)
+# cosmic: primary particles are directionally emitted with a probability proportional to the cosine^2 of the angle from the surface normal (Cosmic-ray model)
+# flat: primary particles are directionally emitted with a divergence angle of flat distribution (v_x, v_y, v_z, phi)
+# gauss: primary particles are directionally emitted with a divergence angle of Gaussian distribution (v_x, v_y, v_z, phi)
+# custom: user's custom function defined in Global.cc
 #########################################
 
 isotropic
+
+#lambert	v_x	v_y	v_z
+#lambert	0	0	1
+
+#cosmic		v_x	v_y	v_z
+#cosmic		0	0	1
 
 #flat		v_x	v_y	v_z	phi
 #flat		0	0	1	30
 
 #gauss		v_x	v_y	v_z	phi
 #gauss		0	0	1	30
+
+#custom

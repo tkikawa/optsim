@@ -11,6 +11,9 @@ Index 1.0
 5	examples/baby_mind/mppc1.stl	detector
 6	examples/baby_mind/mppc2.stl	detector
 
+[Particle]
+photon
+
 [Source]
 CADvolume 	examples/baby_mind/scintillator.stl
 

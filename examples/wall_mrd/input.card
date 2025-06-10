@@ -11,6 +11,9 @@ Index 1.0
 5	examples/wall_mrd/mppc1.stl	detector
 6	examples/wall_mrd/mppc2.stl	detector
 
+[Particle]
+photon
+
 [Source]
 CADvolume 	examples/wall_mrd/scintillator.stl
 

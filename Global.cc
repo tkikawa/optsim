@@ -1,5 +1,35 @@
 #include "Global.hh"
 
+Position CustomSource(std::mt19937 mt){//User's custom function for primary particle position
+  std::uniform_real_distribution<double> uniform;
+  std::normal_distribution<double> gauss;
+  std::exponential_distribution<double> exp;
+  Position p;
+  p[0]=0;
+  p[1]=0;
+  p[2]=0;
+  return p;
+}
+
+Direction CustomDirection(std::mt19937 mt){//User's custom function for primary particle direction
+  std::uniform_real_distribution<double> uniform;
+  std::normal_distribution<double> gauss;
+  std::exponential_distribution<double> exp;
+  Direction v;
+  v[0]=0;
+  v[1]=0;
+  v[2]=1;
+  return v;
+}
+
+double ScintiDelay(std::mt19937 mt){//User's custom function for delay time of scintillation emission
+  std::uniform_real_distribution<double> uniform;
+  std::normal_distribution<double> gauss;
+  std::exponential_distribution<double> exp;
+  double t=0;
+  return t;
+}
+
 void ReadInFile(const char *inpath, Config &vars){//Read out the input card file.
   std::ifstream infile(inpath);
   if(!infile){

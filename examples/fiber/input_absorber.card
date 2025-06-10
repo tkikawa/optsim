@@ -10,6 +10,9 @@ Index 1.0
 4	examples/fiber/edge_coating.stl	absorber
 5	examples/fiber/mppc.stl	detector
 
+[Particle]
+photon
+
 [Source]
 CADvolume 	examples/fiber/core.stl
 

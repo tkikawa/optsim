@@ -11,6 +11,9 @@ Index 1.0
 5	examples/simple/absorber.stl	absorber
 6	examples/simple/mppc.stl	detector
 
+[Particle]
+photon
+
 [Source]
 CADvolume 	examples/simple/scintillator.stl
 

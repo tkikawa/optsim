@@ -7,35 +7,91 @@ Simulator::Simulator(std::mt19937 MT, Config config, std::string OUTPUT, Source 
     mat(MAT),
     nevt(10000),
     index0(1),
-    displaymode(false)
+    yield(0),
+    wlmin(-99999),
+    wlmax(-99999),
+    gmie(-99999),
+    sci_type(""),
+    displaymode(false),
+    act_scinti(false),
+    act_cherenkov(false),
+    usemie(false)
 {
   std::istringstream(config["Global"]["Number"]) >> nevt;
+  if(nevt<=0){
+    std::cout<<"Number of primary particles is "<<nevt<<std::endl;
+    std::cout<<"It must be more than 0."<<std::endl;
+  }
   std::istringstream(config["Global"]["Index"]) >> index0;
+  if(index0<1){
+    std::cout<<"Refractive index of surroundings is"<<index0<<std::endl;
+    std::cout<<"It must be 1 or more."<<std::endl;
+  }
+  std::istringstream(config["Global"]["Scintillation"]) >> sci_type >> yield;
+  if(!sci_type.empty()){
+    check_defined(sci_type);
+    std::cout<<"Scintillation is activated with "<<sci_type <<" scintillator with "<<yield<<" photons/MeV."<<std::endl;
+    act_scinti=true;
+  }
+  std::istringstream(config["Global"]["Cherenkov"]) >> wlmin >> wlmax;
+  if(wlmin>100&&wlmin<wlmax&&wlmax<700){
+    std::cout<<"Cherenkov radiation is activated for wavelendth range of "<<wlmin<<" nm to "<<wlmax<<" nm."<<std::endl;
+    act_cherenkov=true;
+  }
+  else if(wlmin!=-99999||wlmax!=-99999){
+    std::cout<<"Setting of wavelength range for Cherenkov radiation is strange."<<std::endl;
+    exit(1);
+  }
+  std::istringstream(config["Global"]["Mie"]) >> gmie;
+  if(gmie>-1&&gmie<1){
+    std::cout<<"Mie scattering is activated with asymmetry parameter = "<<gmie<<std::endl;
+    usemie=true;
+  }
+  else if(gmie!=-99999){
+    std::cout<<"Asymmetry parameter in Mie scattering is "<<gmie<<std::endl;
+    std::cout<<"It must be between -1 and 1."<<gmie<<std::endl;
+    exit(1);
+  }
   chg = new Charged(mt,mat);
+  if(act_scinti||act_cherenkov)chg->SetBeta(src->GetBeta());
+  if(act_scinti)chg->SetScinti(sci_type,yield);
+  if(act_cherenkov)chg->SetCherenkov(wlmin,wlmax);
 }
 Simulator::~Simulator()
 {
 }
 void Simulator::Run(){//Run simulation
-  file = new TFile(output.c_str(), "recreate");
+  file = new TFile(output.c_str(), "recreate");//Output ROOT file
   tree = new TTree("tree","tree");
-  tree->Branch("ipos[3]",&ipos,"ipos[3]/D");
-  tree->Branch("fpos[3]",&fpos,"fpos[3]/D");
-  tree->Branch("ivec[3]",&ivec,"ivec[3]/D");
-  tree->Branch("fvec[3]",&fvec,"fvec[3]/D");
-  tree->Branch("time",&time,"time/D");
-  tree->Branch("length",&length,"length/D");
-  tree->Branch("imat",&imat,"imat/I");
-  tree->Branch("fmat",&fmat,"fmat/I");
-  tree->Branch("ftype",&ftype,"ftype/I");
-  tree->Branch("nref",&nref,"nref/I");
-  tree->Branch("npas",&npas,"npas/I");
-  for(int j=0;j<5;j++)count[j]=0;
+  tree->Branch("ipos[3]",&ipos,"ipos[3]/D");//Initial position of optical photon (mm). [0], [1], [2] for x, y, z.
+  tree->Branch("fpos[3]",&fpos,"fpos[3]/D");//Final position of optical photon (mm). [0], [1], [2] for x, y, z.
+  tree->Branch("ivec[3]",&ivec,"ivec[3]/D");//Initial direction of optical photon (mm). [0], [1], [2] for x, y, z.
+  tree->Branch("fvec[3]",&fvec,"fvec[3]/D");//Final direction of optical photon (mm). [0], [1], [2] for x, y, z.
+  tree->Branch("time",&time,"time/D");//Time from generation to end of optical photon (ns).
+  tree->Branch("length",&length,"length/D");//Total path length traveled by optical photon (mm).
+  tree->Branch("imat",&imat,"imat/I");//Material ID in which optical photon was generated.
+  tree->Branch("fmat",&fmat,"fmat/I");//Material ID in which optical photon ended.
+  tree->Branch("ftype",&ftype,"ftype/I");//ID which identifies how optical photon ended. (See README)
+  tree->Branch("nref",&nref,"nref/I");//Number of reflections of optical photon in boundaries.
+  tree->Branch("npas",&npas,"npas/I");//Number of transmissions of optical photon in boundaries.
   if(src->ChargedMode()){
-    std::cout<<"Generate "<<nevt<<" charged particles."<<std::endl;
+    tree->Branch("id",&id,"id/I");//ID of corresponding charged particle.
+
+    charged = new TTree("charged","charged");
+    charged->Branch("ipos[3]",&pos,"ipos[3]/D");//Initial position of charged particle (mm). [0], [1], [2] for x, y, z.
+    charged->Branch("ivec[3]",&vec,"ivec[3]/D");//Initial direction of charged particle (mm). [0], [1], [2] for x, y, z.
+    charged->Branch("nph",&nph,"nph/I");//Number of produced photons
+    charged->Branch("id",&id,"id/I");//ID for charged particles.
   }
-  else{
-    std::cout<<"Generate "<<nevt<<" optical photons."<<std::endl;
+  
+  for(int j=0;j<5;j++)count[j]=0;
+  if(!displaymode){
+    if(src->ChargedMode()){
+      std::cout<<"Generate "<<nevt<<" charged particles."<<std::endl;
+    }
+    else{
+      std::cout<<"Generate "<<nevt<<" optical photons."<<std::endl;
+    }
   }
   bool progbar=false;
   if(nevt>=100&&!displaymode)progbar=true;
@@ -59,23 +115,26 @@ void Simulator::Run(){//Run simulation
       src->Generate(pos, vec);//Determine the initial position and direction of charged particle
       if(displaymode){
 	for(int j=0;j<3;j++)cross[j]=pos[j]+vec[j]*world;
-	Track(pos,cross,1);
+	gui->DrawTrack(pos,cross,1);
       }
       chg->Simulate(pos, vec);//Simualtion for charged particles.
       nph=chg->GetNPhotons();
+      id=i;
+      charged->Fill();
     }
     else nph=1;
     for(int p=0;p<nph;p++){
       if(src->ChargedMode()){
-	chg->Generate(pos, vec, p);//Determine the initial position and direction
+	time=chg->Generate(pos, vec, p);//Determine the initial position, direction and time
 	mn=PointMaterial(pos);//Check the material of initial position
       }
       else{
+	time=0;
 	while(1){
 	  src->Generate(pos, vec);//Determine the initial position and direction
 	  mn=PointMaterial(pos);//Check the material of initial position
 	  if(mn==-1)break;//Check if initial position of out of material volumes (i.e. air).
-	  else if(mat[mn]->Type()<=1)break;//Check if the material type is medium or converter
+	  else if(mat[mn]->TType()<2||mat[mn]->TType()==6)break;//Check if the material type is medium, converter or mixture including medium or converter
 	}
       }
       if(mn!=-1){//Initial position is in the defined material volumes.
@@ -158,10 +217,11 @@ void Simulator::Run(){//Run simulation
 		pl=apl;
 		btype=-3;
 	      }
-	      else{//Rayleigh scattering in the medium
+	      else{//Rayleigh or Mie scattering in the medium
 		pl=spl;
 		btype=4;
-		Rayleigh(vec,newvec);
+		if(!usemie) Rayleigh(vec,newvec);
+		else         Mie(vec,newvec);
 	      }
 	      for(int j=0;j<3;j++){
 		newpos[j]=pos[j]+vec[j]*pl;
@@ -171,7 +231,7 @@ void Simulator::Run(){//Run simulation
 	  length+=pl;
 	  time+=pl/c_0*index;
 	  if(displaymode){
-	    Track(pos,newpos);
+	    gui->DrawTrack(pos,newpos);
 	  }
 	}
 	else{
@@ -179,7 +239,7 @@ void Simulator::Run(){//Run simulation
 	    for(int j=0;j<3;j++){
 	      cand[j]=pos[j]+vec[j]*world*2;
 	    }
-	    Track(pos,cand);
+	    gui->DrawTrack(pos,cand);
 	  }
 	}
 	if(btype >= -1 && btype <4){
@@ -229,79 +289,16 @@ void Simulator::Run(){//Run simulation
       count[ftype]++;
     }//end of for
   }//end of for
-  Summary();  
+  if(!displaymode){
+    Summary();
+  }
   file->Write();
   file->Close();  
 }
-void Simulator::Display(){//Event display mode
-  std::map<std::pair<Position, Position>, std::vector<Direction>> edge_to_norm;
+void Simulator::SetDisplay(Gui *GUI){
+  gui = GUI;
+  gui->SetSimulator(this);
   displaymode=true;
-  TCanvas *c1 = new TCanvas("Event display","Event display",hsize,vsize);
-  TView *view = TView::CreateView(1);
-  x_min = y_min = z_min = world;
-  x_max = y_max = z_max = -world;
-  for(unsigned int m=0;m<mat.size();m++){//loop for Materials
-    edge_to_norm.clear();
-    for(int t=0;t<mat[m]->NTriangle();t++){//loop for Triangles
-      for(int j=0;j<3;j++){
-	Position p1 = Round({ mat[m]->GetTriangle(t).X(j),       mat[m]->GetTriangle(t).Y(j),       mat[m]->GetTriangle(t).Z(j) });
-	Position p2 = Round({ mat[m]->GetTriangle(t).X((j+1)%3), mat[m]->GetTriangle(t).Y((j+1)%3), mat[m]->GetTriangle(t).Z((j+1)%3) });
-	if(ComparePosition(p1,p2))std::swap(p1, p2);
-	edge_to_norm[{p1, p2}].push_back(mat[m]->GetTriangle(t).GetNormal());
-	Compare(x_max, x_min, p1[0]);
-	Compare(y_max, y_min, p1[1]);
-	Compare(z_max, z_min, p1[2]);
-      }//end of for      
-    }//end of for
-    for (auto it = edge_to_norm.begin(); it != edge_to_norm.end(); ++it) {
-      if (it->second.size() != 2) continue;
-      if (!Parallel(it->second[0], it->second[1])){
-	Draw(it->first.first,it->first.second,mat[m]->Type());
-      }
-    }
-  }//end of for
-  r_max = (x_max-x_min > y_max-y_min) ? x_max-x_min : y_max-y_min;
-  r_max = (z_max-z_min > r_max) ? z_max-z_min : r_max;
-  view->SetRange((x_max-x_min-r_max)/2, (y_max-y_min-r_max)/2, (z_max-z_min-r_max)/2,
-		 (x_max-x_min+r_max)/2, (y_max-y_min+r_max)/2, (z_max-z_min+r_max)/2);
-
-  std::cout<<"******** Display mode ********"<<std::endl;
-  std::cout<<"Red:    normal medium material"<<std::endl;
-  std::cout<<"Magenta:converter material"<<std::endl;
-  std::cout<<"Yellow: mirror material"<<std::endl;
-  std::cout<<"Green:  diffuser material"<<std::endl;
-  std::cout<<"Cyan:   absorber material"<<std::endl;
-  std::cout<<"Blue:   detector material"<<std::endl;
-  std::string msg;
-  while(1){
-    std::cout<<"Waiting for input."<<std::endl;
-    std::cout<<"\"quit\" or \"exit\": Terminate the display mode."<<std::endl;
-    std::cout<<"\"gui\"           : Switch to GUI control mode."<<std::endl;
-    std::cout<<"\"save\"          : Save the event display."<<std::endl;
-    std::cout<<"Positive integer: Generate photons and display tracks."<<std::endl;
-    c1->Update();
-    std::cin >> msg;
-    if(msg=="quit" || msg=="exit")break;
-    else if(msg=="gui"){
-      std::cout<<"Switched to GUI control mode."<<std::endl;
-      std::cout<<"Event display can be rotated or cotrolled with mouse."<<std::endl;
-      std::cout<<"Double click the event display to switch back to CUI control mode."<<std::endl;
-      c1->WaitPrimitive();
-      std::cout<<"Switched to CUI control mode."<<std::endl;
-    }
-    else if(msg=="save"){
-      std::cout<<"File name :"<<std::flush;
-      std::cin >> msg;
-      c1->Print(msg.c_str());
-    }
-    else if(std::all_of(msg.cbegin(), msg.cend(), isdigit)){
-      if(stoi(msg)>0){
-	nevt=stoi(msg);
-	Run();
-      }
-    }
-  }
-  c1->Close();
 }
 int Simulator::PointMaterial(const Position& p){//Check the material of initial position
   for(unsigned int m=0;m<mat.size();m++){
@@ -322,7 +319,6 @@ void Simulator::Initialize(){//Initialize the variables.
   nref=0;
   npas=0;
   length=0;
-  time=0;
 }
 int Simulator::FType(int bt){//Conver the temporary type ID to final type ID
   if(bt==-2)return 0;     //Go out of world volume.
@@ -423,89 +419,94 @@ void Simulator::Lambert(const Direction& v, Direction& newv, Direction norm){//D
   newv[2]=              -sint*ranv[1]      +cost*ranv[2];
 }
 void Simulator::Rayleigh(const Direction& v, Direction& newv){//Rayleigh scattering in the medium
-  if(unirand(mt)<2./3.){//Angle-independent term
-    Isotropic(newv);
+  double costheta;
+
+  // Sampling using cos\theta from P(cos\theta) \propto 1 + cos^2\theta using rejection sampling
+  while (true) {
+    double x = 2.0 * unirand(mt) - 1.0; // x in [-1, 1]
+    double y = unirand(mt) * 2.0;       // y in [0, 2]
+    if (y <= 1 + x * x) {
+      costheta = x;
+      break;
+    }
   }
-  else{//cos^2(theta)-dependent term
-  double cost,sint,cosp,sinp;
-  double ranv[3],vr,ang;  
-  cost=v[2];
-  sint=sqrt(1-cost*cost);
-  if(sint!=0){
-    cosp=v[0]/sint;
+  double sintheta = sqrt(1.0 - costheta * costheta);
+  double phi = 2 * pi * unirand(mt);
+  double cosphi = cos(phi);
+  double sinphi = sin(phi);
+
+  // Define local coordinate system
+  double ux = v[0], uy = v[1], uz = v[2];
+  double vx[3], wx[3];
+  if (fabs(uz) < 0.99) {
+    vx[0] = -uy;
+    vx[1] = ux;
+    vx[2] = 0;
+  } else {
+    vx[0] = 0;
+    vx[1] = -uz;
+    vx[2] = uy;
   }
-  else{
-    cosp=1;
-  }
-  if(v[1]>0){
-    sinp=sqrt(1-cosp*cosp);
-  }
-  else{
-    sinp=-sqrt(1-cosp*cosp);
+  // vx normalization
+  double norm = sqrt(vx[0]*vx[0] + vx[1]*vx[1] + vx[2]*vx[2]);
+  vx[0] /= norm; vx[1] /= norm; vx[2] /= norm;
+
+  // wx = v × vx
+  wx[0] = uy * vx[2] - uz * vx[1];
+  wx[1] = uz * vx[0] - ux * vx[2];
+  wx[2] = ux * vx[1] - uy * vx[0];
+
+  // newv = sin\theta cos\phi * vx + sin\theta sin\phi * wx + cos\theta * v
+  for (int i = 0; i < 3; ++i) {
+    newv[i] = sintheta * cosphi * vx[i] + sintheta * sinphi * wx[i] + costheta * v[i];
   }
 
-  if(unirand(mt)<0.5){
-    ranv[2]=sqrt(sqrt(unirand(mt)));
+  Normalize(newv);
+}
+void Simulator::Mie(const Direction& v, Direction& newv){//Mie scattering in the medium
+  // Sampling cos\theta from Henyey-Greenstein distribution
+  double xi = unirand(mt);
+  double costheta;
+
+  if (fabs(gmie) < 1e-6) {
+    costheta = 2.0 * xi - 1.0; // Isotropic scattering case
+  } else {
+    double sq = (1.0 - gmie * gmie) / (1.0 - gmie + 2.0 * gmie * xi);
+    costheta = (1.0 + gmie * gmie - sq * sq) / (2.0 * gmie);
   }
-  else{
-    ranv[2]=-sqrt(sqrt(unirand(mt)));
+
+  double sintheta = sqrt(std::max(0.0, 1.0 - costheta * costheta));
+  double phi = 2.0 * pi * unirand(mt);
+  double cosphi = cos(phi);
+  double sinphi = sin(phi);
+
+  // Define local coordinate system
+  double ux = v[0], uy = v[1], uz = v[2];
+  double vx[3], wx[3];
+  if (fabs(uz) < 0.99) {
+    vx[0] = -uy;
+    vx[1] = ux;
+    vx[2] = 0;
+  } else {
+    vx[0] = 0;
+    vx[1] = -uz;
+    vx[2] = uy;
   }
-  ang=unirand(mt)*2*pi;
-  vr=sqrt(1-ranv[2]*ranv[2]);
-  ranv[0]=vr*cos(ang);
-  ranv[1]=vr*sin(ang);
-  newv[0]=-sinp*ranv[0] +cost*cosp*ranv[1] +sint*cosp*ranv[2];
-  newv[1]=cosp*ranv[0]  +cost*sinp*ranv[1] +sint*sinp*ranv[2];
-  newv[2]=              -sint*ranv[1]      +cost*ranv[2];    
+  // vx normalization
+  double norm = sqrt(vx[0]*vx[0] + vx[1]*vx[1] + vx[2]*vx[2]);
+  vx[0] /= norm; vx[1] /= norm; vx[2] /= norm;
+
+  // wx = v × vx
+  wx[0] = uy * vx[2] - uz * vx[1];
+  wx[1] = uz * vx[0] - ux * vx[2];
+  wx[2] = ux * vx[1] - uy * vx[0];
+
+  // newv = sin\theta cos\phi * vx + sin\theta sin\phi * wx + cos\theta * v
+  for (int i = 0; i < 3; ++i) {
+    newv[i] = sintheta * cosphi * vx[i] + sintheta * sinphi * wx[i] + costheta * v[i];
   }
-}
-void Simulator::Draw(const Position& p0, const Position& p1, int type){//Draw materials in the event display
-  TPolyLine3D *l = new TPolyLine3D(2);
-  l->SetPoint(0,p0[0],p0[1],p0[2]);
-  l->SetPoint(1,p1[0],p1[1],p1[2]);
-  l->SetPoint(0,p0[0],p0[1],p0[2]);
-  if(type==0)     l->SetLineColor(2);
-  else if(type==1)l->SetLineColor(6);
-  else if(type==2)l->SetLineColor(5);
-  else if(type==3)l->SetLineColor(8);
-  else if(type==4)l->SetLineColor(7);
-  else if(type==5)l->SetLineColor(4);
-  l->Draw();
-}
-void Simulator::Track(const Position& p0, const Position& p1, bool charged){//Draw track of optical photon in the event display
-  TPolyLine3D *l = new TPolyLine3D(2);
-  l->SetPoint(0,p0[0],p0[1],p0[2]);
-  l->SetPoint(1,p1[0],p1[1],p1[2]);
-  if(charged){
-    l->SetLineColor(2);
-    l->SetLineWidth(3);
-  }
-  else{
-    l->SetLineColor(1);
-    l->SetLineWidth(2);
-  }
-  l->Draw();
-}
-void Simulator::Compare(double &A_max, double &A_min, double A){//Update the minimum and maximum points of a coordinate
-  if(A_min > A) A_min = A;
-  if(A_max < A) A_max = A;
-}
-bool Simulator::ComparePosition(const Position& p0, const Position& p1){
-    for (int i = 0; i < 3; ++i) {
-        if (p0[i] != p1[i]) return p0[i] < p1[i];
-    }
-    return false;
-}
-bool Simulator::Parallel(const Direction& n0, const Direction& n1){
-  return fabs(n0[0]*n1[0] + n0[1]*n1[1] + n0[2]*n1[2]) > 0.999;
-}
-Position Simulator::Round(const Position& p0){
-  double eps = 1e-5;
-  return {
-	  std::round(p0[0] / eps) * eps,
-	  std::round(p0[1] / eps) * eps,
-	  std::round(p0[2] / eps) * eps
-  };
+
+  Normalize(newv);
 }
 void Simulator::Normalize(Direction& v){//Normalize the vector norm.
   double norm=v[0]*v[0]+v[1]*v[1]+v[2]*v[2];
@@ -519,4 +520,17 @@ void Simulator::Isotropic(Direction& v){//Randomely and isotropically determine 
   double vr=sqrt(1-v[2]*v[2]);
   v[0]=vr*cos(ang);
   v[1]=vr*sin(ang);
+}
+void Simulator::check_defined(const std::string& input){
+  const std::string candidates[6] = {
+     "organic", "NaI", "CsI", "BGO", "LYSO", "LaBr3"
+  };
+  
+  for (int i = 0; i < 6; ++i) {
+    if (input == candidates[i]) {
+      return;
+    }
+  }
+  std::cerr<<"Error: scintillator type must be selected from organic, NaI, CsI, BGO, LYSO or LaBr3."<<std::endl;
+  exit(1);
 }
