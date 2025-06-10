@@ -26,7 +26,7 @@ A Monte Carlo simulation code for optical photon behavior in 3D geometries.
 * [ASSIMP](https://www.assimp.org/): A portable open source library to import various 3D model formats.
 * Used to import material geometry for simulation from 3D model files.
 * [Latest releases](https://github.com/assimp/assimp/releases)
-* Version 5.0.1 tested.
+* Version 5.4.3 tested.
 * Documentation: [ASSIMP Docs](https://assimp-docs.readthedocs.io/en/latest/)
 
 ### ROOT
@@ -34,7 +34,7 @@ A Monte Carlo simulation code for optical photon behavior in 3D geometries.
 * [ROOT](https://root.cern.ch/): An object-oriented program and library developed by CERN.
 * Used for simulation output (TFile/TTree) and event display.
 * [Latest releases](https://root.cern/install/all_releases/)
-* Version 6.18.04 tested.
+* Version 6.34.08 tested.
 * Documentation: [ROOT Manual](https://root.cern/manual/)
 
 ## 2. Installation
@@ -102,8 +102,6 @@ make
 | ------ | ------------------------------------- |
 | -s     | Set the random seed                   |
 | -d     | Launch display mode                   |
-| -l     | Scintillation photon calculation mode |
-| -c     | Cherenkov photon calculation mode     |
 
 ### Display Mode
 
@@ -170,14 +168,24 @@ Several parts of a SolidWorks assembly can be exported as follows:
 | Scintillation | Activate scintillation with scinti_type and yield [photons/MeV]  | inactive |
 | Cherenkov     | Activate Cherenkov radiation with min. and max. wavelendths [nm] | inactive | 
 
-The generation of 1,000 primary particles with a refractive index of 1.0 for the surrounding medium is defined as follows:
+The generation of 1,000 primary particles with a refractive index of 1.0 for the surrounding medium, with activating the scintillation for NaI scintillation (yeild = 38000 photons/MeV) is defined as follows:
 
 ```txt
 [Global]
 Number 1000
 Index 1.0
+Scintillation NaI 38000
 ```
 
+Following types of scintillators are available.
+| Type name | Description                                                    | Default photon yield [photons/MeV] |
+| --------- | -------------------------------------------------------------- | ---------------------------------- |
+| organic   | Organic scintillator including plastic or liquid scintillator. | 10000                              |
+| NaI       | Sodium iodide scintillator.                                    | 38000                              |
+| CsI       | Cesium iodide scintillator.                                    | 54000                              |
+| BGO       | Bismuth germanate scintillator.                                | 9000                               |
+| LYSO      | Cerium-doped lutetium yttrium orthosilicate scintillator.      | 32000                              |
+| LaBr3     | Cerium-doped lanthanum bromide scintillator.                   | 63000                              |
 
 ### Material
 
@@ -237,10 +245,13 @@ Properties that need to be or can be set for `medium` and `converter` materials:
 
 Defines the type of the primary particles.
 
-| Type    | Description                    | Parameter
-| ------- | ------------------------------ | ---------------------------------------------------------------------------- |
-| photon  | Optical photons as primaries.  | (No parameter)                                                                   |
-| charged | Charged particles as primaries.| Scintillation or Cherenkov generation must be activated for some materials. |
+| Type     | Description                    | Parameter
+| -------- | ------------------------------ | -------------------- |
+| photon   | Optical photons as primaries.  | (No parameter)       |
+| electron | Electrons as primaries.        | Kinetic energy [MeV] |
+| muon     | Muons as primaries.            | Kinetic energy [MeV] |
+| pion     | Charged pions as primaries.    | Kinetic energy [MeV] |
+| proton   | Protons as primaries.          | Kinetic energy [MeV] |
 
 #### Source
 
@@ -256,7 +267,7 @@ Defines the position of the primary particles.
 | cylsurface | Uniform on a cylinder surface | r\_min, r\_max, phi\_min, phi\_max, z\_min, z\_max |
 | sphvolume  | Uniform in a sphere volume    | x\_center, y\_center, z\_center, r                 |
 | sphsurface | Uniform on a sphere surface   | x\_center, y\_center, z\_center, r                 |
-| custom     | User's custom function        | (No parameters)                                    |
+| custom     | User's custom function        | (No parameter)                                     |
 
 * Unit of x, y, z, r with subscripts is mm.
 * Unit of phi with subscripts is degree.
@@ -273,7 +284,7 @@ Defines the direction of the primary particles.
 | cosmic    | Cosmic-ray model (~cos^2\theta).  | v\_x, v\_y, v\_z      |
 | flat      | Flat angular divergence.          | v\_x, v\_y, v\_z, phi |
 | gauss     | Gaussian angular divergence.      | v\_x, v\_y, v\_z, phi |
-| custom    | User's custom function            | (No parameters)       |
+| custom    | User's custom function            | (No parameter)        |
 
 * v\_x, v\_y, v\_z represent the vector for central direction.
 * Unit of phi is degree.
