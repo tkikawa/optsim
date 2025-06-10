@@ -1,7 +1,8 @@
 #include "Mixture.hh"
 
 Mixture::Mixture(std::mt19937 MT, int ID, std::string MATFILE, std::vector<std::pair<double, std::string>> MIX, double INDEX=1, double ATTLEN=0, double SCATLEN=0)
-  : Material(MT, ID, MATFILE, "mixture", INDEX, ATTLEN, SCATLEN)
+  : Material(MT, ID, MATFILE, "mixture", INDEX, ATTLEN, SCATLEN),
+    is_scinti(false)
 {
   double total=0;
   for(unsigned int i=0;i<MIX.size();i++){
@@ -17,6 +18,10 @@ Mixture::Mixture(std::mt19937 MT, int ID, std::string MATFILE, std::vector<std::
     else if(MIX[i].second=="diffuser")  tp = 3;
     else if(MIX[i].second=="absorber")  tp = 4;
     else if(MIX[i].second=="detector")  tp = 5;
+    else if(MIX[i].second=="scintillator"){
+      tp = 0;
+      is_scinti=true;
+    }
     else{
       std::cerr<<std::endl;
       std::cerr<<"Error: Material type: "<<MIX[i].second<<" for ID="<<ID<<" is invalid."<<std::endl;

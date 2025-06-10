@@ -1,7 +1,7 @@
 #include "Source.hh"
 
 Source::Source(std::mt19937 MT, Config config)
-  : Geometry(MT), mass(0), energy(0), beta(1), charge(0)
+  : Geometry(MT), mass(0), energy(0), beta(1)
 {
   if(config["Source"].size()==0){
     std::cerr<<"Error: Souce is not defined in the input card file."<<std::endl;
@@ -80,33 +80,23 @@ Source::Source(std::mt19937 MT, Config config)
   else if (particlemode == "electron"){
     charged = true;
     mass=0.511;
-    charge=1;
     particleconf >> energy;
   }
   else if (particlemode == "muon"){
     charged = true;
     mass=105.658;
-    charge=1;
     particleconf >> energy;
   }
   else if (particlemode == "pion"){
     charged = true;
     mass=139.570;
-    charge=1;
     particleconf >> energy;
   }
   else if (particlemode == "proton"){
     charged = true;
     mass=938.272;
-    charge=1;
     particleconf >> energy;
   }
-  else if (particlemode == "alpha"){
-    charged = true;
-    mass=3727.38;
-    charge=2;
-    particleconf >> energy;
-  }  
   else{
     std::cerr<<"Error: Invalid particle type."<<std::endl;
     std::cerr<<"Particle type must be either photon, electron, muon, pion, proton or alpha."<<std::endl;
@@ -124,8 +114,8 @@ Source::Source(std::mt19937 MT, Config config)
   std::istringstream directionconf(config["Direction"].begin()->second);
   std::cout<<"Direction type is "<<directionmode<<"."<<std::endl;
   if (directionmode == "isotropic"){
-    v_x=0; v_y=0; v_z=1; phi=180;
-    phi*=conv;
+    v_x=0; v_y=0; v_z=1; phi_max=180;
+    phi_max*=conv;
   }
   else if (directionmode == "lambert"){
     directionconf >> v_x >> v_y >> v_z;
@@ -134,12 +124,12 @@ Source::Source(std::mt19937 MT, Config config)
     directionconf >> v_x >> v_y >> v_z;
   }  
   else if (directionmode == "flat"){
-    directionconf >> v_x >> v_y >> v_z >> phi;
-    phi*=conv;
+    directionconf >> v_x >> v_y >> v_z >> phi_max;
+    phi_max*=conv;
   }
   else if (directionmode == "gauss"){
-    directionconf >> v_x >> v_y >> v_z >> phi;
-    phi*=conv;
+    directionconf >> v_x >> v_y >> v_z >> phi_max;
+    phi_max*=conv;
   }
   else if(directionmode != "custom"){
     std::cerr<<"Error: Invalid direction type."<<std::endl;
@@ -164,7 +154,7 @@ Source::Source(std::mt19937 MT, Config config)
     sinp=-sqrt(1-cosp*cosp);
   }
 
-  rz=cos(phi);
+  rz=cos(phi_max);
 }
 Source::~Source()
 {
@@ -336,6 +326,5 @@ void Source::Normalize(double &vx, double &vy, double &vz){//Normalize the vecto
 double Source::CalcBeta(double m, double T){
   double E = T + m;
   double gamma = E / m;
-  double beta = std::sqrt(1.0 - 1.0 / (gamma * gamma));
-  return beta;
+  return std::sqrt(1.0 - 1.0 / (gamma * gamma));
 }

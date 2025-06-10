@@ -180,8 +180,7 @@ double Charged::CalcCheProb(double n){
   double coeff = 2.0 * pi * alpha;
   double factor = 1.0 - 1.0 / (beta * beta * n * n);
   double integral = (1.0 / wlmin_cm) - (1.0 / wlmax_cm);
-  double photons_per_cm = coeff * factor * integral;
-  return photons_per_cm / 10.0;
+  return coeff * factor * integral / 10.0;// Photon yield per unit length (photons/mm)
 }
 void Charged::CalcSciPar(){
   const double K = 0.307075; // MeV mol^-1 cm^2
@@ -192,6 +191,6 @@ void Charged::CalcSciPar(){
   double Wmax = (2.0 * me * beta2 * gamma2) /
                   (1.0 + 2.0 * gamma * me / 105.658 + std::pow(me / 105.658, 2));
   double arg = (2.0 * me * beta2 * gamma2 * Wmax) / (I * I);
-  dedx = K * (Z / A) * density * (1.0 / beta2) * (0.5 * std::log(arg) - beta2) / 10.; // dE/dx (MeV/cm)
+  dedx = K * (Z / A) * density * (1.0 / beta2) * (0.5 * std::log(arg) - beta2) / 10.; // dE/dx (MeV/mm)
   width_pp = 0.5 * K * (Z / A) * density * (1.0 / beta2) / 10.; // scaling parameter per path (MeV/mm)
 }

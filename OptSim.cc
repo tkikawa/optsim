@@ -41,7 +41,7 @@ bool is_number(const std::string& s) {
 
 std::vector<Material*> CofigMaterials(std::mt19937 mt, Config config){
   std::vector<Material*> materials;
-  std::string matfile, type;
+  std::string matfile;
   int id;
   double index, attlen, scatlen;
   for(std::map<std::string, std::string>::iterator i = config["Material"].begin(); i != config["Material"].end(); i++){
@@ -80,10 +80,9 @@ std::vector<Material*> CofigMaterials(std::mt19937 mt, Config config){
       materials.push_back(mat);
     } else {
       // Process as a normal (single) Material
-      std::string type = elem;
       index=1; attlen=0; scatlen=0;
       ss >> index >> attlen >> scatlen;
-      Material *mat = new Material(mt, id, matfile, type, index, attlen, scatlen);
+      Material *mat = new Material(mt, id, matfile, elem, index, attlen, scatlen);
       materials.push_back(mat);
     }
   }
@@ -93,16 +92,7 @@ std::vector<Material*> CofigMaterials(std::mt19937 mt, Config config){
 
 int main(int argc, char *argv[])
 {
-
-  bool photon_calc = false;
-  for (int i = 1; i < argc; ++i) {
-    if (strcmp(argv[i], "-c") == 0 || strcmp(argv[i], "-l") == 0) {
-      photon_calc = true;
-      break;
-    }
-  }
-  
-  if (argc < 3 && !photon_calc) {
+  if (argc < 3) {
     PrintUsage();
   }
   TApplication* app = new TApplication("app", 0, 0);

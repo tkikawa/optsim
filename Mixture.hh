@@ -13,10 +13,10 @@ public:
   virtual ~Mixture();
   int Type();
   int TType(){return type;}
+  bool Is_Scinti(){return is_scinti;}
 
 private:
-  int id, type;
-  double index, attlen, scatlen;
+  int type;
   bool is_scinti;
   std::vector<std::pair<double, int>> mix;
 };

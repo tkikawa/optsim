@@ -33,10 +33,10 @@ private:
   double r_min, r_max, phi_min, phi_max, r;
   double topsurf, insurf, outsurf, xsurf, ysurf, zsurf, totsurf;
   std::string sourcefile;
-  double v_x, v_y, v_z, phi;
+  double v_x, v_y, v_z;
   double cost,sint,cosp,sinp;
   double rz,vr,ang;
-  double mass,energy,beta,charge;
+  double mass,energy,beta;
 };
 
 #endif

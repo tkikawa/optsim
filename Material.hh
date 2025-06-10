@@ -17,7 +17,7 @@ public:
   double Index(){return index;}
   double AttLen(){return attlen;}
   double ScatLen(){return scatlen;}
-  bool Is_Scinti(){return is_scinti;}
+  virtual bool Is_Scinti(){return is_scinti;}
 
 private:
   int id, type;
