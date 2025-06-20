@@ -19,7 +19,7 @@ public:
   double Generate(Position& pos, Direction& vec, int n);
   int GetNPhotons();
   void SetBeta(double BETA);
-  void SetScinti(std::string sci_type, double YIELD);
+  void SetScinti(std::string sci_type, double YIELD, double DELAY);
   void SetCherenkov(double WLMIN, double WLMAX);
     
 private:
@@ -30,6 +30,7 @@ private:
   int NumPhoton(double d, double prob, bool is_scinti);
   void CalcSciPar();
   double CalcCheProb(double n);
+  double ScintiDelay();
   std::mt19937 mt;
   std::uniform_real_distribution<double> unirand;
   std::vector<Material*> mat;
@@ -40,7 +41,7 @@ private:
   std::vector<std::tuple<Position, Position, double>> particle;
   double cheprob,dedx,width_pp,p_sci,p_che,dist,s;
   int n_sci,n_che;
-  double wlmin, wlmax, yield,A,Z,I,density,beta;
+  double wlmin, wlmax, yield, A, Z, I, density, beta, scinti_lifetime;
   bool act_sci,act_che;
   TRandom3 rng;
 };

@@ -22,14 +22,6 @@ Direction CustomDirection(std::mt19937 mt){//User's custom function for primary 
   return v;
 }
 
-double ScintiDelay(std::mt19937 mt){//User's custom function for delay time of scintillation emission
-  std::uniform_real_distribution<double> uniform;
-  std::normal_distribution<double> gauss;
-  std::exponential_distribution<double> exp;
-  double t=0;
-  return t;
-}
-
 void ReadInFile(const char *inpath, Config &vars){//Read out the input card file.
   std::ifstream infile(inpath);
   if(!infile){

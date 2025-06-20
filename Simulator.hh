@@ -50,7 +50,7 @@ private:
   Gui *gui=nullptr;
   std::vector<Material*> mat;
   int nevt, nph;
-  double index0, yield, wlmin, wlmax,gmie;
+  double index0, yield, delay, wlmin, wlmax,gmie;
   std::string sci_type;
   Position pos,vec,cross,cand,newpos;
   Direction newvec,normal;

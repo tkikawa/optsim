@@ -10,9 +10,11 @@ Charged::Charged(std::mt19937 MT, std::vector<Material*> &MAT)
   int seed = seed_dist(mt);
   rng.SetSeed(seed);
 }
+
 Charged::~Charged()
 {
 }
+
 void Charged::Simulate(const Position& pos, const Direction& vec)
 {
   particle.clear();
@@ -51,7 +53,7 @@ void Charged::Simulate(const Position& pos, const Direction& vec)
 	  s = unirand(mt);
 	  ptn = Interpolate(cross[2*t], cross[2*t+1], s);
 	  dir = Isotropic();
-	  time = Distance(pos,ptn)/(c_0*beta)+ScintiDelay(mt);
+	  time = Distance(pos,ptn)/(c_0*beta)+ScintiDelay();
 	  particle.push_back(std::make_tuple(ptn, dir, time));
 	}
 	for(int p=0;p<n_che;p++){//Generate Cherenkov photons along the path
@@ -65,16 +67,19 @@ void Charged::Simulate(const Position& pos, const Direction& vec)
     }
   }
 }
+
 double Charged::Generate(Position& pos, Position& vec, int n)
 {
   pos=std::get<0>(particle[n]);
   vec=std::get<1>(particle[n]);
   return std::get<2>(particle[n]);
 }
+
 int Charged::GetNPhotons()
 {
   return particle.size();
 }
+
 int Charged::NumPhoton(double d, double prob, bool is_scinti=true)
 {
   if(prob==0)return 0;
@@ -92,6 +97,7 @@ int Charged::NumPhoton(double d, double prob, bool is_scinti=true)
   std::poisson_distribution<int> poisson_dist(n_exp);
   return poisson_dist(mt);
 }
+
 double Charged::Distance(const Position& p1, const Position& p2)
 {
     return std::sqrt(
@@ -100,6 +106,7 @@ double Charged::Distance(const Position& p1, const Position& p2)
         std::pow(p1[2] - p2[2], 2)
     );
 }
+
 Position Charged::Interpolate(const Position& p1, const Position& p2, double t) {
     return {
         p1[0] + t * (p2[0] - p1[0]),
@@ -107,6 +114,7 @@ Position Charged::Interpolate(const Position& p1, const Position& p2, double t) 
         p1[2] + t * (p2[2] - p1[2])
     };
 }
+
 Direction Charged::Isotropic(){//Randomely and isotropically determine the direction
   Direction v;
   v[2]=1-2*unirand(mt);
@@ -145,27 +153,33 @@ Direction Charged::CherenkovDir(double index, const Direction& vec){//Determine 
   vche[2]=           -sint*v[1]      +cost*v[2];  
   return vche;
 }
+
 void Charged::SetBeta(double BETA){
   beta=BETA;
 }
-void Charged::SetScinti(std::string sci_type, double YIELD){
+
+void Charged::SetScinti(std::string sci_type, double YIELD, double DELAY){
   act_sci=true;
-  yield=YIELD;
-  std::map<std::string, std::tuple<double, double, double, double, double>> scintillators = {
-											     {"organic", {5.7, 11.4, 1.032, 64e-6, 10000}},
-											     {"NaI",     {32.0, 74.5, 3.67, 528e-6, 38000}},
-											     {"CsI",     {54.0, 132.5, 4.51, 560e-6, 54000}},
-											     {"BGO",     {75.0, 208.0, 7.13, 710e-6, 9000}},
-											     {"LYSO",    {66.0, 174.0, 7.10, 730e-6, 32000}},
-											     {"LaBr3",   {47.0, 102.0, 5.08, 470e-6, 63000}}
+  yield = YIELD;
+  scinti_lifetime = DELAY;
+  std::map<std::string, std::tuple<double, double, double, double, double, double>> scintillators
+    = {//Name, Z, A, density, I, light_yield, life_time
+	{"organic", {5.7, 11.4, 1.032, 64.e-6, 10000., 2.1}},
+	{"NaI",     {32.0, 74.5, 3.67, 528.e-6, 38000., 230.}},
+	{"CsI",     {54.0, 132.5, 4.51, 560.e-6, 65000., 1000.}},
+	{"BGO",     {75.0, 208.0, 7.13, 710.e-6, 8200., 300.}},
+	{"LYSO",    {66.0, 174.0, 7.10, 730.e-6, 25000., 50.}},
+	{"LaBr3",   {47.0, 102.0, 5.08, 470.e-6, 63000., 26.}}
   };
   Z = std::get<0>(scintillators[sci_type]);
   A = std::get<1>(scintillators[sci_type]);
   density = std::get<2>(scintillators[sci_type]);
   I = std::get<3>(scintillators[sci_type]);
-  if(yield==0)yield=std::get<4>(scintillators[sci_type]);
+  if(yield==0)yield = std::get<4>(scintillators[sci_type]);
+  if(scinti_lifetime==0)scinti_lifetime = std::get<5>(scintillators[sci_type]);
   CalcSciPar();
 }
+
 void Charged::SetCherenkov(double WLMIN, double WLMAX){
   act_che=true;
   wlmin=WLMIN;
@@ -182,6 +196,7 @@ double Charged::CalcCheProb(double n){
   double integral = (1.0 / wlmin_cm) - (1.0 / wlmax_cm);
   return coeff * factor * integral / 10.0;// Photon yield per unit length (photons/mm)
 }
+
 void Charged::CalcSciPar(){
   const double K = 0.307075; // MeV mol^-1 cm^2
   const double me = 0.511;   // MeV/c^2
@@ -193,4 +208,9 @@ void Charged::CalcSciPar(){
   double arg = (2.0 * me * beta2 * gamma2 * Wmax) / (I * I);
   dedx = K * (Z / A) * density * (1.0 / beta2) * (0.5 * std::log(arg) - beta2) / 10.; // dE/dx (MeV/mm)
   width_pp = 0.5 * K * (Z / A) * density * (1.0 / beta2) / 10.; // scaling parameter per path (MeV/mm)
+}
+
+double Charged::ScintiDelay(){
+  std::exponential_distribution<double> exp_dist(1.0 / scinti_lifetime);
+  return exp_dist(mt);
 }

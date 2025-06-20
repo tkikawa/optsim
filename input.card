@@ -9,13 +9,13 @@ Index 1.0
 #Mie 0.8
 
 #Activate scintillation
-#Scintillation	scintillator_type photon_yield_per_energy [photons/MeV]
-#Scintillation	organic		  10000
-#Scintillation	NaI		  38000
-#Scintillation	CsI		  54000
-#Scintillation	BGO		  9000
-#Scintillation	LYSO		  32000
-#Scintillation	LaBr3		  63000
+#Scintillation	scintillator_type photon_yield[photons/MeV] life_time[ns]
+#Scintillation	organic		  10000.		    2.1
+#Scintillation	NaI		  38000.		    230.
+#Scintillation	CsI		  65000.		    1000.
+#Scintillation	BGO		  8200.			    300.
+#Scintillation	LYSO		  25000.		    50.
+#Scintillation	LaBr3		  63000.		    26.
 
 #Activate Cherenkov radiation
 #Cherenkov  minimum_wavelength[nm]  maximum_wavelength[nm]

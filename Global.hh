@@ -25,7 +25,6 @@ using Direction = std::array<double, 3>;
 
 Position CustomSource(std::mt19937 mt);
 Direction CustomDirection(std::mt19937 mt);
-double ScintiDelay(std::mt19937 mt);
 void ReadInFile(const char *inpath, Config &vars);//Read variables from input card file into map
 
 #endif

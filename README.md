@@ -160,15 +160,15 @@ Several parts of a SolidWorks assembly can be exported as follows:
 
 ### Global
 
-| Parameter     | Description                                                      | Default  |
-| ------------- | ---------------------------------------------------------------- | -------- |
-| Number        | Number of primary particles (photons or charged particles)       | 10000    |
-| Index         | Refractive index of surroundings (air)                           | 1        |
-| Mie           | Activate Mie scattering with asymmetric parameters               | inactive |
-| Scintillation | Activate scintillation with scinti_type and yield [photons/MeV]  | inactive |
-| Cherenkov     | Activate Cherenkov radiation with min. and max. wavelengths [nm] | inactive | 
+| Parameter     | Description                                                               | Default  |
+| ------------- | ------------------------------------------------------------------------- | -------- |
+| Number        | Number of primary particles (photons or charged particles)                | 10000    |
+| Index         | Refractive index of surroundings (air)                                    | 1        |
+| Mie           | Activate Mie scattering with asymmetric parameters                        | inactive |
+| Scintillation | Activate scintillation with type, yield [photons/MeV] and life time [ns]  | inactive |
+| Cherenkov     | Activate Cherenkov radiation with min. and max. wavelengths [nm]          | inactive | 
 
-The generation of 1,000 primary particles with a refractive index of 1.0 for the surrounding medium, with activating the scintillation for NaI scintillation (yeild = 38000 photons/MeV) is defined as follows:
+The generation of 1,000 primary particles with a refractive index of 1.0 for the surrounding medium, with activating the scintillation for NaI scintillation (photon yeild = 38000 photons/MeV) is defined as follows:
 
 ```txt
 [Global]
@@ -177,15 +177,15 @@ Index 1.0
 Scintillation NaI 38000
 ```
 
-Following types of scintillators are available.
-| Type name | Description                                                    | Default photon yield [photons/MeV] |
-| --------- | -------------------------------------------------------------- | ---------------------------------- |
-| organic   | Organic scintillator including plastic or liquid scintillator. | 10000                              |
-| NaI       | Sodium iodide scintillator.                                    | 38000                              |
-| CsI       | Cesium iodide scintillator.                                    | 54000                              |
-| BGO       | Bismuth germanate scintillator.                                | 9000                               |
-| LYSO      | Cerium-doped lutetium yttrium orthosilicate scintillator.      | 32000                              |
-| LaBr3     | Cerium-doped lanthanum bromide scintillator.                   | 63000                              |
+Following types of scintillators are available with default photon yield and life time.
+| Name    | Description                                               | Yield [photons/MeV] | Life [ns] |
+| ------- | --------------------------------------------------------- | ------------------- | --------- |
+| organic | Organic scintillator like plastic or liquid scintillator. | 10000               | 2.1       |
+| NaI     | Sodium iodide scintillator.                               | 38000               | 230.      |
+| CsI     | Cesium iodide scintillator.                               | 65000               | 1000.     |
+| BGO     | Bismuth germanate scintillator.                           | 8200                | 300.      |
+| LYSO    | Cerium-doped lutetium yttrium orthosilicate scintillator. | 25000               | 50.       |
+| LaBr3   | Cerium-doped lanthanum bromide scintillator.              | 63000               | 26.       |
 
 ### Material
 
@@ -198,15 +198,15 @@ Following types of scintillators are available.
 
 #### Material Type
 
-| Material Type | Description                                                                                  |
-| ------------- | -------------------------------------------------------------------------------------------- |
-| medium        | Normal medium in which the optical photon transmits.                                         |
-| scintillator  | Like medium, but the scintillation photons can be generated in charged particle mode.        |
-| converter     | Like medium, but the optical photon are isotropically scattered when it enters the material. |
-| mirror        | When the optical photon reaches the surface of the material, it is specularly reflected.     |
-| diffuser      | When the optical photon reaches the surface of the material, it is diffusely reflected.      |
-| absorber      | When the optical photon reaches the surface of the material, it is absorbed.                 |
-| detector      | Like absorber, but tagged as detected in the output.                                         |
+| Material Type | Description                                                                           |
+| ------------- | ------------------------------------------------------------------------------------- |
+| medium        | Normal medium in which the photon transmits.                                          |
+| scintillator  | Like medium, but the scintillation photons can be generated in charged particle mode. |
+| converter     | Like medium, but the photon are isotropically scattered when it enters the material.  |
+| mirror        | When the photon reaches the surface of the material, it is specularly reflected.      |
+| diffuser      | When the photon reaches the surface of the material, it is diffusely reflected.       |
+| absorber      | When the photon reaches the surface of the material, it is absorbed.                  |
+| detector      | Like absorber, but tagged as detected in the output.                                  |
 
 * A mixture of existing materials can also be defined to simulate the optical photons' behavior probabilistically.
 * For example, a mixture of 70% reflector and 30% absorber can be defined as follows, which causes incoming photons to be reflected with 70% probability and absorbed with 30% probability.
@@ -308,13 +308,12 @@ gauss 0 0 1 30
 
 ### Custom function
 
-When the custom mode is selected for source or direction mode, users can define arbitrary spatial or angular functions tailored to specific use cases. In addition, user can also specify a custom time distribution to model delayed scintillation emission which is fixed at zero by default. These functions are in Global.cc as follows.
+When the custom mode is selected for source or direction mode, users can define arbitrary spatial or angular functions tailored to specific use cases.
 
 | Function        | Description
 | --------------- | ------------------------------------------------- |
 | CustomSource    | Specify position of primary particles.            |
 | CustomDirection | Specify direction of primary particles.           |
-| ScintiDelay     | Specify the delay time of scintillation emission. |
 
 ## 6. Examples
 

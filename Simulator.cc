@@ -8,6 +8,7 @@ Simulator::Simulator(std::mt19937 MT, Config config, std::string OUTPUT, Source 
     nevt(10000),
     index0(1),
     yield(0),
+    delay(0),
     wlmin(-99999),
     wlmax(-99999),
     gmie(-99999),
@@ -27,10 +28,15 @@ Simulator::Simulator(std::mt19937 MT, Config config, std::string OUTPUT, Source 
     std::cout<<"Refractive index of surroundings is"<<index0<<std::endl;
     std::cout<<"It must be 1 or more."<<std::endl;
   }
-  std::istringstream(config["Global"]["Scintillation"]) >> sci_type >> yield;
+  std::istringstream(config["Global"]["Scintillation"]) >> sci_type >> yield >> delay;
   if(!sci_type.empty()){
     check_defined(sci_type);
-    std::cout<<"Scintillation is activated with "<<sci_type <<" scintillator with "<<yield<<" photons/MeV."<<std::endl;
+    if(yield==0){
+      std::cout<<"Scintillation is activated with "<<sci_type <<" scintillator with default light yield."<<std::endl;
+    }
+    else{
+      std::cout<<"Scintillation is activated with "<<sci_type <<" scintillator with "<<yield<<" photons/MeV."<<std::endl;
+    }
     act_scinti=true;
   }
   std::istringstream(config["Global"]["Cherenkov"]) >> wlmin >> wlmax;
@@ -54,7 +60,7 @@ Simulator::Simulator(std::mt19937 MT, Config config, std::string OUTPUT, Source 
   }
   chg = new Charged(mt,mat);
   if(act_scinti||act_cherenkov)chg->SetBeta(src->GetBeta());
-  if(act_scinti)chg->SetScinti(sci_type,yield);
+  if(act_scinti)chg->SetScinti(sci_type,yield,delay);
   if(act_cherenkov)chg->SetCherenkov(wlmin,wlmax);
 }
 Simulator::~Simulator()
@@ -62,7 +68,7 @@ Simulator::~Simulator()
 }
 void Simulator::Run(){//Run simulation
   file = new TFile(output.c_str(), "recreate");//Output ROOT file
-  tree = new TTree("tree","tree");
+  tree = new TTree("photon","photon");
   tree->Branch("ipos[3]",&ipos,"ipos[3]/D");//Initial position of optical photon (mm). [0], [1], [2] for x, y, z.
   tree->Branch("fpos[3]",&fpos,"fpos[3]/D");//Final position of optical photon (mm). [0], [1], [2] for x, y, z.
   tree->Branch("ivec[3]",&ivec,"ivec[3]/D");//Initial direction of optical photon (mm). [0], [1], [2] for x, y, z.
