@@ -352,6 +352,7 @@ When the **particle mode is set to `photon`**, the following process is applied:
    * At each boundary:
 
      * **medium**: Reflection or refraction using Fresnel equations.
+     * **converter**: Reflection or refraction using Fresnel equations, but the photon are isotropically scattered when it enters the material.
      * **mirror**: Specular reflection.
      * **diffuser**: Lambertian (cosine law) reflection.
      * **absorber/detector**: Absorbed or detected.
@@ -366,7 +367,7 @@ When the **particle mode is set to `electron`, `muon`, `pion` or `proton`**:
 
 1. **Initial position and direction of each charged particle** are sampled according to the `[Source]` and `[Direction]` settings in the input card file.
 2. The passage of each charged particle through the geometry is simulated.
-3. As the charged particle traverses the medium, the production of **scintillation photons** or **Cherenkov photons** is simulated based on the specified yield per unit length for each material.
+3. As the charged particle traverses the medium, the production of **scintillation photons** or **Cherenkov photons** is simulated based on Bethe–Bloch equation and Frank–Tamm formula, respectively.
 4. For each generated optical photon:
 
    * **Initial position and direction** are determined according to the physical processes (e.g., random along the charged particle's path, appropriate angular distribution).
