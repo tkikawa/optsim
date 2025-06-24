@@ -240,8 +240,8 @@ void Gui::SetGeometry(){
   }//end of for
   r_max = (x_max-x_min > y_max-y_min) ? x_max-x_min : y_max-y_min;
   r_max = (z_max-z_min > r_max) ? z_max-z_min : r_max;
-  view->SetRange((x_max-x_min-r_max)/2, (y_max-y_min-r_max)/2, (z_max-z_min-r_max)/2,
-		 (x_max-x_min+r_max)/2, (y_max-y_min+r_max)/2, (z_max-z_min+r_max)/2);  
+  view->SetRange((x_max+x_min-r_max)/2, (y_max+y_min-r_max)/2, (z_max+z_min-r_max)/2,
+		 (x_max+x_min+r_max)/2, (y_max+y_min+r_max)/2, (z_max+z_min+r_max)/2);
 }
 void Gui::DrawGeometry(){
   int type;
@@ -262,8 +262,8 @@ void Gui::DrawGeometry(){
     else if(type>=6)l->SetLineColor(28);
     l->Draw();
   }
-  view->SetRange((x_max-x_min-r_max)/2, (y_max-y_min-r_max)/2, (z_max-z_min-r_max)/2,
-		 (x_max-x_min+r_max)/2, (y_max-y_min+r_max)/2, (z_max-z_min+r_max)/2);    
+  view->SetRange((x_max+x_min-r_max)/2, (y_max+y_min-r_max)/2, (z_max+z_min-r_max)/2,
+		 (x_max+x_min+r_max)/2, (y_max+y_min+r_max)/2, (z_max+z_min+r_max)/2);
 }
 void Gui::CloseWindow(){
   std::cout<<"GUI window was closed."<<std::endl;

@@ -5,9 +5,9 @@ Position CustomSource(std::mt19937 mt){//User's custom function for primary part
   std::normal_distribution<double> gauss;
   std::exponential_distribution<double> exp;
   Position p;
-  p[0]=0;
-  p[1]=0;
-  p[2]=0;
+  p[0]=-1+2*uniform(mt);
+  p[1]=-1+2*uniform(mt);
+  p[2]=-1+2*uniform(mt);
   return p;
 }
 
@@ -16,9 +16,10 @@ Direction CustomDirection(std::mt19937 mt){//User's custom function for primary 
   std::normal_distribution<double> gauss;
   std::exponential_distribution<double> exp;
   Direction v;
-  v[0]=0;
-  v[1]=0;
-  v[2]=1;
+  double ang=uniform(mt)*2*pi;
+  v[0]=cos(ang);
+  v[1]=sin(ang);
+  v[2]=0;
   return v;
 }
 

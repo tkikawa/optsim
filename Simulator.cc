@@ -222,12 +222,13 @@ void Simulator::Run(){//Run simulation
 	      if(apl<spl){//Absorption in the medium
 		pl=apl;
 		btype=-3;
+		newmatid=matid;
 	      }
 	      else{//Rayleigh or Mie scattering in the medium
 		pl=spl;
-		btype=4;
+		btype=10;
 		if(!usemie) Rayleigh(vec,newvec);
-		else         Mie(vec,newvec);
+		else        Mie(vec,newvec);
 	      }
 	      for(int j=0;j<3;j++){
 		newpos[j]=pos[j]+vec[j]*pl;
@@ -248,7 +249,7 @@ void Simulator::Run(){//Run simulation
 	    gui->DrawTrack(pos,cand);
 	  }
 	}
-	if(btype >= -1 && btype <4){
+	if((btype >= -1 && btype <4) || btype==10){
 	  if(btype <= 1){
 	    if(Fresnel(vec,newvec,normal,index,newindex)){//Determine if the optical photon is reflected or transmitted with refraction following the Fresnel equation
 	      mn=newmn;

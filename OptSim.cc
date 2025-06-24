@@ -71,11 +71,9 @@ std::vector<Material*> CofigMaterials(std::mt19937 mt, Config config){
         // If there are still material properties such as index, restore the stream position for parsing
         ss.seekg((int)ss.tellg() - (int)elem.length());
       }
-      
       // Initialize material property values
       index=1; attlen=0; scatlen=0;
       ss >> index >> attlen >> scatlen;
-      
       Material *mat = new Mixture(mt, id, matfile, mix, index, attlen, scatlen);
       materials.push_back(mat);
     } else {
@@ -97,7 +95,7 @@ int main(int argc, char *argv[])
   }
   TApplication* app = new TApplication("app", 0, 0);
 
-  struct timeval  start_time, end_time;
+  struct timeval start_time, end_time;
   gettimeofday(&start_time, NULL);
 
   int seed=-1;
