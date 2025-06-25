@@ -52,27 +52,28 @@ void Charged::Simulate(const Position& pos, const Direction& vec)
 	for(int p=0;p<n_sci;p++){//Generate scintillation photons along the path
 	  s = unirand(mt);
 	  ptn = Interpolate(cross[2*t], cross[2*t+1], s);
-	  dir = Isotropic();
+	  ScintiDir(dir,plr);
 	  time = Distance(pos,ptn)/(c_0*beta)+ScintiDelay();
-	  particle.push_back(std::make_tuple(ptn, dir, time));
+	  particle.push_back(std::make_tuple(ptn, dir, plr, time));
 	}
 	for(int p=0;p<n_che;p++){//Generate Cherenkov photons along the path
 	  s = unirand(mt);
 	  ptn = Interpolate(cross[2*t], cross[2*t+1], s);
-	  dir = CherenkovDir(mat[m]->Index(),vec);
+	  CherenkovDir(mat[m]->Index(),vec,dir,plr);
 	  time = Distance(pos,ptn)/(c_0*beta);
-	  particle.push_back(std::make_tuple(ptn, dir, time));
+	  particle.push_back(std::make_tuple(ptn, dir, plr, time));
 	}
       }      
     }
   }
 }
 
-double Charged::Generate(Position& pos, Position& vec, int n)
+void Charged::Generate(Position& pos, Position& vec, Position& pol, double& t, int n)
 {
   pos=std::get<0>(particle[n]);
   vec=std::get<1>(particle[n]);
-  return std::get<2>(particle[n]);
+  pol=std::get<2>(particle[n]);
+  t=std::get<3>(particle[n]);
 }
 
 int Charged::GetNPhotons()
@@ -115,43 +116,45 @@ Position Charged::Interpolate(const Position& p1, const Position& p2, double t) 
     };
 }
 
-Direction Charged::Isotropic(){//Randomely and isotropically determine the direction
-  Direction v;
-  v[2]=1-2*unirand(mt);
-  double ang=unirand(mt)*2*pi;
-  double vr=sqrt(1-v[2]*v[2]);
-  v[0]=vr*cos(ang);
-  v[1]=vr*sin(ang);
-  return v;
+void Charged::ScintiDir(Direction& vsci, Direction& psci){
+  Isotropic(mt,vsci);// Generate isotropic photon direction vector (vsci)
+  RandomPolarization(mt,vsci, psci); // Generate random linear polarization vector in the plane orthogonal to vsci
 }
 
-Direction Charged::CherenkovDir(double index, const Direction& vec){//Determine the direction of Cherenkov light
-  Direction v,vche;
-  double sint,cost,sinp,cosp;
-  cost=vec[2];
-  sint=sqrt(1-cost*cost);
-  if(sint!=0){
-    cosp=vec[0]/sint;
-  }
-  else{
-    cosp=1;
-  }
-  if(vec[1] >= 0){
-    sinp=sqrt(1-cosp*cosp);
-  }
-  else{
-    sinp=-sqrt(1-cosp*cosp);
+void Charged::CherenkovDir(double index, const Direction& vec, Direction& vche, Direction& pche){
+  Direction v;
+  double sint, cost, sinp, cosp;
+  cost = vec[2];
+  sint = sqrt(1.0 - cost * cost);
+
+  if(sint != 0){
+    cosp = vec[0] / sint;
+  } else {
+    cosp = 1.0;
   }
 
-  v[2]=1/index/beta;//Cosine of Cherenkov angle
-  double ang=unirand(mt)*2*pi;
-  double vr=sqrt(1-v[2]*v[2]);
-  v[0]=vr*cos(ang);
-  v[1]=vr*sin(ang);
-  vche[0]=-sinp*v[0] +cost*cosp*v[1] +sint*cosp*v[2];
-  vche[1]=cosp*v[0]  +cost*sinp*v[1] +sint*sinp*v[2];
-  vche[2]=           -sint*v[1]      +cost*v[2];  
-  return vche;
+  if(vec[1] >= 0){
+    sinp = sqrt(1.0 - cosp * cosp);
+  } else {
+    sinp = -sqrt(1.0 - cosp * cosp);
+  }
+
+  v[2] = 1.0 / (index * beta); // cos(theta_c)
+  double ang = unirand(mt) * 2 * pi;
+  double vr = sqrt(1.0 - v[2] * v[2]);
+  v[0] = vr * cos(ang);
+  v[1] = vr * sin(ang);
+
+  // --- Apply rotation to obtain global Cherenkov direction (vche) ---
+  vche[0] = -sinp * v[0] + cost * cosp * v[1] + sint * cosp * v[2];
+  vche[1] =  cosp * v[0] + cost * sinp * v[1] + sint * sinp * v[2];
+  vche[2] =                 -sint * v[1]      + cost * v[2];
+
+  Normalize(vche);
+
+  // --- Polarization vector is orthogonal to both vche and vec (pche = vec × vche) ---
+  Cross(vec, vche, pche);
+  Normalize(pche);
 }
 
 void Charged::SetBeta(double BETA){
@@ -185,7 +188,6 @@ void Charged::SetCherenkov(double WLMIN, double WLMAX){
   wlmin=WLMIN;
   wlmax=WLMAX;
 }
-
 double Charged::CalcCheProb(double n){
   const double alpha = 1.0 / 137.035999; // Fine-structure constant
   const double nm_to_cm = 1e-7;

@@ -71,8 +71,10 @@ void Simulator::Run(){//Run simulation
   tree = new TTree("photon","photon");
   tree->Branch("ipos[3]",&ipos,"ipos[3]/D");//Initial position of optical photon (mm). [0], [1], [2] for x, y, z.
   tree->Branch("fpos[3]",&fpos,"fpos[3]/D");//Final position of optical photon (mm). [0], [1], [2] for x, y, z.
-  tree->Branch("ivec[3]",&ivec,"ivec[3]/D");//Initial direction of optical photon (mm). [0], [1], [2] for x, y, z.
-  tree->Branch("fvec[3]",&fvec,"fvec[3]/D");//Final direction of optical photon (mm). [0], [1], [2] for x, y, z.
+  tree->Branch("ivec[3]",&ivec,"ivec[3]/D");//Initial direction of optical photon. [0], [1], [2] for x, y, z.
+  tree->Branch("fvec[3]",&fvec,"fvec[3]/D");//Final direction of optical photon. [0], [1], [2] for x, y, z.
+  tree->Branch("ipol[3]",&ipol,"ipol[3]/D");//Initial polarization of optical photon. [0], [1], [2] for x, y, z.
+  tree->Branch("fpol[3]",&fpol,"fpol[3]/D");//Final polarization of optical photon. [0], [1], [2] for x, y, z.
   tree->Branch("time",&time,"time/D");//Time from generation to end of optical photon (ns).
   tree->Branch("length",&length,"length/D");//Total path length traveled by optical photon (mm).
   tree->Branch("imat",&imat,"imat/I");//Material ID in which optical photon was generated.
@@ -118,7 +120,7 @@ void Simulator::Run(){//Run simulation
       }
     }
     if(src->ChargedMode()){
-      src->Generate(pos, vec);//Determine the initial position and direction of charged particle
+      src->Generate(pos, vec, pol);//Determine the initial position and direction of charged particle
       if(displaymode){
 	for(int j=0;j<3;j++)cross[j]=pos[j]+vec[j]*world;
 	gui->DrawTrack(pos,cross,1);
@@ -131,13 +133,13 @@ void Simulator::Run(){//Run simulation
     else nph=1;
     for(int p=0;p<nph;p++){
       if(src->ChargedMode()){
-	time=chg->Generate(pos, vec, p);//Determine the initial position, direction and time
+	chg->Generate(pos, vec, pol, time, p);//Determine the initial position, direction and time
 	mn=PointMaterial(pos);//Check the material of initial position
       }
       else{
 	time=0;
 	while(1){
-	  src->Generate(pos, vec);//Determine the initial position and direction
+	  src->Generate(pos, vec, pol);//Determine the initial position and direction
 	  mn=PointMaterial(pos);//Check the material of initial position
 	  if(mn==-1)break;//Check if initial position of out of material volumes (i.e. air).
 	  else if(mat[mn]->TType()<2||mat[mn]->TType()==6)break;//Check if the material type is medium, converter or mixture including medium or converter
@@ -227,8 +229,8 @@ void Simulator::Run(){//Run simulation
 	      else{//Rayleigh or Mie scattering in the medium
 		pl=spl;
 		btype=10;
-		if(!usemie) Rayleigh(vec,newvec);
-		else        Mie(vec,newvec);
+		if(!usemie) Rayleigh(vec,pol,newvec,newpol);
+		else        Mie(vec,pol,newvec,newpol);
 	      }
 	      for(int j=0;j<3;j++){
 		newpos[j]=pos[j]+vec[j]*pl;
@@ -251,7 +253,7 @@ void Simulator::Run(){//Run simulation
 	}
 	if((btype >= -1 && btype <4) || btype==10){
 	  if(btype <= 1){
-	    if(Fresnel(vec,newvec,normal,index,newindex)){//Determine if the optical photon is reflected or transmitted with refraction following the Fresnel equation
+	    if(Fresnel(vec,pol,newvec,newpol,normal,index,newindex)){//Determine if the optical photon is reflected or transmitted with refraction following the Fresnel equation
 	      mn=newmn;
 	      matid=newmatid;
 	      index=newindex;
@@ -259,7 +261,8 @@ void Simulator::Run(){//Run simulation
 	      scatlen=newscatlen;
 	      npas++;
 	      if(btype == 1){//Isotropic scattering for converter
-		Isotropic(newvec);
+		Isotropic(mt,newvec);
+		RandomPolarization(mt,newvec,newpol);
 	      }
 	    }
 	    else{
@@ -267,17 +270,19 @@ void Simulator::Run(){//Run simulation
 	    }
 	  }
 	  else if(btype == 2){
-	    Specular(vec,newvec,normal);//Specular reflection
+	    Specular(vec,pol,newvec,newpol,normal);//Specular reflection
 	    nref++;
 	  }
 	  else if(btype == 3){
-	    Lambert(vec,newvec,normal);//Diffusion following the Lambert's cosine law
+	    Lambert(vec,newvec,newpol,normal);//Diffusion following the Lambert's cosine law
 	    nref++;
 	  }
 	  Normalize(newvec);
+	  Normalize(newpol);
 	  for(int j=0;j<3;j++){
 	    pos[j]=newpos[j]+newvec[j]*nano;
 	    vec[j]=newvec[j];
+	    pol[j]=newpol[j];
 	  }
 	}
 	else break;//Absorbed, detected or go out of world volume.
@@ -289,6 +294,7 @@ void Simulator::Run(){//Run simulation
       for(int j=0;j<3;j++){
 	fpos[j]=newpos[j];
 	fvec[j]=newvec[j];
+	fpol[j]=newpol[j];
       }
       fmat=newmatid;
       ftype=FType(btype);//Conversion of type ID.
@@ -319,8 +325,10 @@ void Simulator::Initialize(){//Initialize the variables.
   for(int j=0;j<3;j++){
     ipos[j]=pos[j];
     ivec[j]=vec[j];
+    ipol[j]=pol[j];
     newpos[j]=pos[j];
     newvec[j]=vec[j];
+    newpol[j]=pol[j];
   }
   imat=matid;
   nref=0;
@@ -345,138 +353,200 @@ void Simulator::Summary(){//Display the summary of simulation
   std::cout<<"Absorbed by absorber       : "<<count[3]<<std::endl;
   std::cout<<"Detected by detector       : "<<count[4]<<std::endl;
 }
-bool Simulator::Fresnel(const Direction& v, Direction& newv, Direction norm, double idx_in, double idx_out){//Determine if the optical photon is reflected or transmitted with refraction following the Fresnel equation
-  double idx_ratio=idx_out/idx_in;
-  double cos_in=v[0]*norm[0]+v[1]*norm[1]+v[2]*norm[2];
-  double sin_in=sqrt(1-cos_in*cos_in);
-  if(cos_in>0){
-    for(int i=0;i<3;i++){
-      norm[i]*=-1;
-    }
+bool Simulator::Fresnel(const Direction& v, const Direction& p, Direction& newv, Direction& newp, Direction norm, double idx_in, double idx_out) {//Determine if the optical photon is reflected or transmitted with refraction following the Fresnel equation
+  double cos_in = Dot(v, norm);
+  if (cos_in > 0) {
+    for (int i = 0; i < 3; ++i) norm[i] *= -1;
+  } else {
+    cos_in *= -1;
   }
-  else{
-    cos_in*=-1;
-  }
-  if(sin_in>idx_ratio){//Total reflection
-    Specular(v,newv,norm);
+
+  double eta = idx_in / idx_out;
+  double sin2_t = eta * eta * (1.0 - cos_in * cos_in);
+
+  // Define s and p polarization directions for the incident ray
+  Direction s_dir, p_dir;
+  Cross(norm, v, s_dir);
+  Normalize(s_dir);
+  Cross(s_dir, v, p_dir);
+  Normalize(p_dir);
+
+  double s_amp = Dot(p, s_dir);
+  double p_amp = Dot(p, p_dir);
+
+  if (sin2_t > 1.0) {  // Total internal reflection
+    Specular(v, p, newv, newp, norm);  // use new polarization-aware version
     return false;
   }
-  else{
-    double sin_out=sin_in/idx_ratio;//Snell's law
-    double cos_out=sqrt(1-sin_out*sin_out);
-    double ref_prob=0.5*(pow(cos_in-idx_ratio*cos_out,2)/pow(cos_in+idx_ratio*cos_out,2)+pow(idx_ratio*cos_in-cos_out,2)/pow(idx_ratio*cos_in+cos_out,2));//Fresnel equations
-    if(unirand(mt)<ref_prob){//Reflection
-      Specular(v,newv,norm);
-      return false;
+
+  double cos_out = sqrt(1.0 - sin2_t);
+  double rs = (idx_in * cos_in - idx_out * cos_out) / (idx_in * cos_in + idx_out * cos_out);
+  double rp = (idx_out * cos_in - idx_in * cos_out) / (idx_out * cos_in + idx_in * cos_out);
+  double ts = 2.0 * idx_in * cos_in / (idx_in * cos_in + idx_out * cos_out);
+  double tp = 2.0 * idx_in * cos_in / (idx_out * cos_in + idx_in * cos_out);
+
+  double ref_prob = 0.5 * (rs * rs + rp * rp);
+  if (unirand(mt) < ref_prob) {  // Reflection
+    Specular(v, p, newv, newp, norm);  // use new polarization-aware version
+    // Uncomment below to amplitude scaling to be preserved
+    /*
+    Direction s_dir_reflected, p_dir_reflected;
+    Cross(norm, newv, s_dir_reflected);
+    Normalize(s_dir_reflected);
+    Cross(s_dir_reflected, newv, p_dir_reflected);
+    Normalize(p_dir_reflected);
+
+    double s_out = Dot(newp, s_dir_reflected) * rs;
+    double p_out = Dot(newp, p_dir_reflected) * rp;
+
+    for (int i = 0; i < 3; ++i) {
+      newp[i] = s_out * s_dir_reflected[i] + p_out * p_dir_reflected[i];
     }
-    else{//Transmission with refraction
-      double para[3];
-      for(int i=0;i<3;i++){
-	para[i]=v[i]+norm[i]*cos_in;
-	if(sin_in!=0){
-	  newv[i]=-norm[i]*cos_out+para[i]/sin_in*sin_out;
-	}
-	else{
-	  newv[i]=v[i];
-	}
-      }
-      return true;
+    Normalize(newp);
+    */
+    return false;
+  } else {  // Refraction
+    for (int i = 0; i < 3; ++i) {
+      newv[i] = eta * v[i] + (eta * cos_in - cos_out) * norm[i];
     }
-  } 
-}
-void Simulator::Specular(const Direction& v, Direction& newv, const Direction& norm){//Specular reflection
-  double cp=v[0]*norm[0]+v[1]*norm[1]+v[2]*norm[2];
-  for(int i=0;i<3;i++){
-    newv[i]=v[i]-2*norm[i]*cp;
+    Normalize(newv);
+
+    // Recalculate new p-direction in the transmitted geometry
+    Direction trans_p_dir;
+    Cross(s_dir, newv, trans_p_dir);
+    Normalize(trans_p_dir);
+
+    for (int i = 0; i < 3; ++i) {
+      newp[i] = ts * s_amp * s_dir[i] + tp * p_amp * trans_p_dir[i];
+    }
+    Normalize(newp);
+    return true;
   }
 }
-void Simulator::Lambert(const Direction& v, Direction& newv, Direction norm){//Diffusion following the Lambert's cosine law
-  double cp=v[0]*norm[0]+v[1]*norm[1]+v[2]*norm[2];
-  if(cp>0){
-    for(int i=0;i<3;i++){
-      norm[i]*=-1;
-    }
+void Simulator::Specular(const Direction& v, const Direction& p, Direction& newv, Direction& newp, Direction norm) {
+  // Calculate mirror-reflected direction ---
+  double cp = Dot(v, norm);
+  for (int i = 0; i < 3; ++i) {
+    newv[i] = v[i] - 2.0 * cp * norm[i];
+  }
+  Normalize(newv);
+
+  // Construct the s-polarization direction (perpendicular to the plane of incidence) ---
+  Direction s_dir;
+  Cross(norm, v, s_dir);
+  Normalize(s_dir);
+
+  // Construct the p-polarization direction (in the plane of incidence) ---
+  Direction p_dir;
+  Cross(s_dir, v, p_dir);
+  Normalize(p_dir);
+
+  // Decompose incident polarization vector into s and p components ---
+  double s_amp = Dot(p, s_dir);
+  double p_amp = Dot(p, p_dir);
+
+  // Reconstruct p-polarization direction after reflection ---
+  Direction new_p_dir;
+  Cross(s_dir, newv, new_p_dir);  // p-direction in the reflected geometry
+  Normalize(new_p_dir);
+
+  // Reconstruct new polarization vector using s and p components ---
+  for (int i = 0; i < 3; ++i) {
+    newp[i] = s_amp * s_dir[i] + p_amp * new_p_dir[i];
+  }
+  Normalize(newp);
+}
+void Simulator::Lambert(const Direction& v, Direction& newv, Direction& newp, Direction norm) {//Diffusion following the Lambert's cosine law
+  // Flip normal if needed to ensure it's against incoming ray ---
+  double cp = Dot(v, norm);
+  if (cp > 0) {
+    for (int i = 0; i < 3; i++) norm[i] *= -1;
   }
 
-  double cost,sint,cosp,sinp;
-  double ranv[3],vr,ang;
-  
-  cost=norm[2];
-  sint=sqrt(1-cost*cost);
-  if(sint!=0){
-    cosp=norm[0]/sint;
-  }
-  else{
-    cosp=1;
-  }
-  if(norm[1]>0){
-    sinp=sqrt(1-cosp*cosp);
-  }
-  else{
-    sinp=-sqrt(1-cosp*cosp);
-  }
+  // Construct local frame aligned with norm ---
+  double cost = norm[2];
+  double sint = sqrt(1.0 - cost * cost);
+  double cosp = (sint != 0.0) ? norm[0] / sint : 1.0;
+  double sinp = (norm[1] > 0.0) ? sqrt(1.0 - cosp * cosp) : -sqrt(1.0 - cosp * cosp);
 
-  ranv[2]=sqrt(unirand(mt));//sqrt is give because of the cosine law.
-  ang=unirand(mt)*2*pi;
-  vr=sqrt(1-ranv[2]*ranv[2]);
-  ranv[0]=vr*cos(ang);
-  ranv[1]=vr*sin(ang);
-  newv[0]=-sinp*ranv[0] +cost*cosp*ranv[1] +sint*cosp*ranv[2];
-  newv[1]=cosp*ranv[0]  +cost*sinp*ranv[1] +sint*sinp*ranv[2];
-  newv[2]=              -sint*ranv[1]      +cost*ranv[2];
+  // Sample newv using Lambert's cosine law ---
+  Direction ranv;
+  ranv[2] = sqrt(unirand(mt)); // cosine-weighted zenith angle
+  double ang = unirand(mt) * 2.0 * pi;
+  double vr = sqrt(1.0 - ranv[2] * ranv[2]);
+  ranv[0] = vr * cos(ang);
+  ranv[1] = vr * sin(ang);
+
+  // Rotate sampled direction into global coordinates ---
+  newv[0] = -sinp * ranv[0] + cost * cosp * ranv[1] + sint * cosp * ranv[2];
+  newv[1] =  cosp * ranv[0] + cost * sinp * ranv[1] + sint * sinp * ranv[2];
+  newv[2] =                     -sint * ranv[1]      + cost * ranv[2];
+  Normalize(newv);
+  RandomPolarization(mt,newv, newp);
 }
-void Simulator::Rayleigh(const Direction& v, Direction& newv){//Rayleigh scattering in the medium
+void Simulator::Rayleigh(const Direction& v, const Direction& p, Direction& newv, Direction& newp){//Rayleigh scattering in the medium
   double costheta;
 
-  // Sampling using cos\theta from P(cos\theta) \propto 1 + cos^2\theta using rejection sampling
+  // Rejection sampling from P(cosθ) ∝ 1 + cos²θ
   while (true) {
-    double x = 2.0 * unirand(mt) - 1.0; // x in [-1, 1]
-    double y = unirand(mt) * 2.0;       // y in [0, 2]
+    double x = 2.0 * unirand(mt) - 1.0;
+    double y = unirand(mt) * 2.0;
     if (y <= 1 + x * x) {
       costheta = x;
       break;
     }
   }
+
   double sintheta = sqrt(1.0 - costheta * costheta);
   double phi = 2 * pi * unirand(mt);
   double cosphi = cos(phi);
   double sinphi = sin(phi);
 
-  // Define local coordinate system
-  double ux = v[0], uy = v[1], uz = v[2];
-  double vx[3], wx[3];
-  if (fabs(uz) < 0.99) {
-    vx[0] = -uy;
-    vx[1] = ux;
-    vx[2] = 0;
+  // Construct orthonormal basis (vx, wx, v)
+  Direction vx, wx;
+  if (fabs(v[2]) < 0.99) {
+    vx = {-v[1], v[0], 0};
   } else {
-    vx[0] = 0;
-    vx[1] = -uz;
-    vx[2] = uy;
+    vx = {0, -v[2], v[1]};
   }
-  // vx normalization
-  double norm = sqrt(vx[0]*vx[0] + vx[1]*vx[1] + vx[2]*vx[2]);
-  vx[0] /= norm; vx[1] /= norm; vx[2] /= norm;
+  Normalize(vx);
+  Cross(v, vx, wx);
+  Normalize(wx);
 
-  // wx = v × vx
-  wx[0] = uy * vx[2] - uz * vx[1];
-  wx[1] = uz * vx[0] - ux * vx[2];
-  wx[2] = ux * vx[1] - uy * vx[0];
-
-  // newv = sin\theta cos\phi * vx + sin\theta sin\phi * wx + cos\theta * v
+  // Compute newv
   for (int i = 0; i < 3; ++i) {
     newv[i] = sintheta * cosphi * vx[i] + sintheta * sinphi * wx[i] + costheta * v[i];
   }
-
   Normalize(newv);
+
+  // Compute scattering plane normal: perp to both v and newv
+  Direction scatter_plane_normal;
+  Cross(v, newv, scatter_plane_normal);
+  Normalize(scatter_plane_normal);
+
+  // Project original polarization p onto new polarization direction
+  // Remove components along newv
+  Direction temp_p;
+  double dot_pv = Dot(p, newv);
+  for (int i = 0; i < 3; ++i) {
+    temp_p[i] = p[i] - dot_pv * newv[i]; // make it orthogonal to newv
+  }
+
+  // Project temp_p onto the scatter_plane_normal direction (this is Rayleigh)
+  double proj = Dot(temp_p, scatter_plane_normal);
+  for (int i = 0; i < 3; ++i) {
+    newp[i] = proj * scatter_plane_normal[i];
+  }
+
+  Normalize(newp);
 }
-void Simulator::Mie(const Direction& v, Direction& newv){//Mie scattering in the medium
-  // Sampling cos\theta from Henyey-Greenstein distribution
+void Simulator::Mie(const Direction& v, const Direction& p, Direction& newv, Direction& newp) {
+  // Sampling scattering direction
   double xi = unirand(mt);
   double costheta;
 
   if (fabs(gmie) < 1e-6) {
-    costheta = 2.0 * xi - 1.0; // Isotropic scattering case
+    costheta = 2.0 * xi - 1.0; // Isotropic case
   } else {
     double sq = (1.0 - gmie * gmie) / (1.0 - gmie + 2.0 * gmie * xi);
     costheta = (1.0 + gmie * gmie - sq * sq) / (2.0 * gmie);
@@ -487,46 +557,53 @@ void Simulator::Mie(const Direction& v, Direction& newv){//Mie scattering in the
   double cosphi = cos(phi);
   double sinphi = sin(phi);
 
-  // Define local coordinate system
-  double ux = v[0], uy = v[1], uz = v[2];
-  double vx[3], wx[3];
-  if (fabs(uz) < 0.99) {
-    vx[0] = -uy;
-    vx[1] = ux;
-    vx[2] = 0;
+  // Define of local coordinate
+  Direction vx, wx;
+  if (fabs(v[2]) < 0.99) {
+    vx = {-v[1], v[0], 0};
   } else {
-    vx[0] = 0;
-    vx[1] = -uz;
-    vx[2] = uy;
+    vx = {0, -v[2], v[1]};
   }
-  // vx normalization
-  double norm = sqrt(vx[0]*vx[0] + vx[1]*vx[1] + vx[2]*vx[2]);
-  vx[0] /= norm; vx[1] /= norm; vx[2] /= norm;
+  Normalize(vx);
+  Cross(v, vx, wx);
+  Normalize(wx);
 
-  // wx = v × vx
-  wx[0] = uy * vx[2] - uz * vx[1];
-  wx[1] = uz * vx[0] - ux * vx[2];
-  wx[2] = ux * vx[1] - uy * vx[0];
-
-  // newv = sin\theta cos\phi * vx + sin\theta sin\phi * wx + cos\theta * v
+  // Calculate new direction
   for (int i = 0; i < 3; ++i) {
     newv[i] = sintheta * cosphi * vx[i] + sintheta * sinphi * wx[i] + costheta * v[i];
   }
-
   Normalize(newv);
-}
-void Simulator::Normalize(Direction& v){//Normalize the vector norm.
-  double norm=v[0]*v[0]+v[1]*v[1]+v[2]*v[2];
-  for(int i=0;i<3;i++){
-    v[i]/=norm;
+
+  // Define incident plane and polarization direction
+  Direction s_dir, p_dir;
+  Cross(newv, v, s_dir); // Perpendicular to incident plane (s-polarization)
+  Normalize(s_dir);
+  Cross(s_dir, v, p_dir); // In incident plane (p-polarization)
+  Normalize(p_dir);
+
+  // Decompose incident poralization vector into s/p
+  double s_amp = Dot(p, s_dir);
+  double p_amp = Dot(p, p_dir);
+
+  // theta dependent model
+  double theta = acos(Dot(v, newv)); // Scattering angle
+  double S_s = 1.0;                  // s-polarization constant
+  double S_p = cos(theta);           // p-polarization constant
+
+  // Polarizaiton direction acter scattering
+  Direction new_s_dir;
+  Cross(newv, v, new_s_dir);
+  Normalize(new_s_dir);
+
+  Direction new_p_dir;
+  Cross(new_s_dir, newv, new_p_dir);
+  Normalize(new_p_dir);
+
+  // Define new polarizaiton vector
+  for (int i = 0; i < 3; ++i) {
+    newp[i] = S_s * s_amp * new_s_dir[i] + S_p * p_amp * new_p_dir[i];
   }
-}
-void Simulator::Isotropic(Direction& v){//Randomely and isotropically determine the direction
-  v[2]=1-2*unirand(mt);
-  double ang=unirand(mt)*2*pi;
-  double vr=sqrt(1-v[2]*v[2]);
-  v[0]=vr*cos(ang);
-  v[1]=vr*sin(ang);
+  Normalize(newp);
 }
 void Simulator::check_defined(const std::string& input){
   const std::string candidates[6] = {

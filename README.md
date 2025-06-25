@@ -245,13 +245,13 @@ Properties that need to be or can be set for `medium` and `converter` materials:
 
 Defines the type of the primary particles.
 
-| Type     | Description                    | Parameter
-| -------- | ------------------------------ | -------------------- |
-| photon   | Optical photons as primaries.  | (No parameter)       |
-| electron | Electrons as primaries.        | Kinetic energy [MeV] |
-| muon     | Muons as primaries.            | Kinetic energy [MeV] |
-| pion     | Charged pions as primaries.    | Kinetic energy [MeV] |
-| proton   | Protons as primaries.          | Kinetic energy [MeV] |
+| Type     | Description                    | Parameter            | Default parameter   |
+| -------- | ------------------------------ | -------------------- | ------------------- |
+| photon   | Optical photons as primaries.  | Polarization [0-1]   | 0 (no polarization) |
+| electron | Electrons as primaries.        | Kinetic energy [MeV] | MIP energy          |
+| muon     | Muons as primaries.            | Kinetic energy [MeV] | MIP energy          |
+| pion     | Charged pions as primaries.    | Kinetic energy [MeV] | MIP energy          |
+| proton   | Protons as primaries.          | Kinetic energy [MeV] | MIP energy          |
 
 #### Source
 
@@ -321,7 +321,7 @@ Example input card files and CAD files are available in the [examples directory]
 
 ## 7. Output ROOT File
 
-The ROOT file contains a TTree \*tree with the following branches:
+The ROOT file contains a TTree \*photon for the interaction history of optical photons with the following branches:
 
 | Branch   | Description                                                                                                     |
 | -------- | --------------------------------------------------------------------------------------------------------------- |
@@ -329,6 +329,8 @@ The ROOT file contains a TTree \*tree with the following branches:
 | fpos\[3] | Final position (x, y, z) in mm                                                                                  |
 | ivec\[3] | Initial direction (x, y, z)                                                                                     |
 | fvec\[3] | Final direction (x, y, z)                                                                                       |
+| ipol\[3] | Initial polarization (x, y, z)                                                                                  |
+| fpol\[3] | Final polarization (x, y, z)                                                                                    |
 | time     | Time from creation to termination in ns                                                                         |
 | length   | Total photon path length in mm                                                                                  |
 | imat     | Material ID at photon generation                                                                                |
@@ -336,6 +338,16 @@ The ROOT file contains a TTree \*tree with the following branches:
 | ftype    | End process (0: out of world, 1: reflection limit, 2: absorbed in medium, 3: absorbed by absorber, 4: detected) |
 | nref     | Number of boundary reflections                                                                                  |
 | npas     | Number of boundary transmissions                                                                                |
+| id       | ID of corresponding charged particle. (only in charged particle mode)                                           |
+
+In the charged particle mode, the ROOT file contains additional TTree \*charged for the track of charged particle with the following branches:
+
+| Branch   | Description                                                                                          |
+| -------- | ---------------------------------------------------------------------------------------------------- |
+| ipos\[3] | Initial position (x, y, z) in mm                                                                     |
+| ivec\[3] | Initial direction (x, y, z)                                                                          |
+| nph      | Number of produced photons                                                                           |
+| id       | ID of charged particle. (used to associate the charged particle information with photon information) |
 
 ## 8. Simulation Process
 

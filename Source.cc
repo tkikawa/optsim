@@ -1,7 +1,7 @@
 #include "Source.hh"
 
 Source::Source(std::mt19937 MT, Config config)
-  : Geometry(MT), mass(0), energy(0), beta(0.96)
+  : Geometry(MT), mass(0), energy(0), beta(0.96), polar(0)
 {
   if(config["Source"].size()==0){
     std::cerr<<"Error: Souce is not defined in the input card file."<<std::endl;
@@ -76,6 +76,12 @@ Source::Source(std::mt19937 MT, Config config)
   std::cout<<"Particle type is "<<particlemode<<"."<<std::endl;  
   if (particlemode == "photon"){
     charged = false;
+    particleconf >> polar;
+    if(polar<0||polar>1){
+      std::cerr<<"Polarization is "<<polar<<"."<<std::endl;
+      std::cerr<<"Polarization must be between 0 (no polarization) and 1 (full polarization)."<<std::endl;
+      exit(1);
+    }
   }
   else if (particlemode == "electron"){
     charged = true;
@@ -103,8 +109,13 @@ Source::Source(std::mt19937 MT, Config config)
     exit(1);
   }
   if(charged){
-    std::cout<<"Particle kinetic energy is "<<energy<<" MeV."<<std::endl;  
-    beta = CalcBeta(mass,energy);
+    if(energy>0){
+      std::cout<<"Particle kinetic energy is "<<energy<<" MeV."<<std::endl;  
+      beta = CalcBeta(mass,energy);
+    }
+    else{
+      std::cout<<"Particle is MIP energy."<<std::endl;  
+    }
   }
   if(config["Direction"].size()==0){
     std::cerr<<"Error: Direction is not defined in the input card file."<<std::endl;
@@ -114,21 +125,21 @@ Source::Source(std::mt19937 MT, Config config)
   std::istringstream directionconf(config["Direction"].begin()->second);
   std::cout<<"Direction type is "<<directionmode<<"."<<std::endl;
   if (directionmode == "isotropic"){
-    v_x=0; v_y=0; v_z=1; phi_max=180;
+    vi[0]=0; vi[1]=0; vi[2]=1; phi_max=180;
     phi_max*=conv;
   }
   else if (directionmode == "lambert"){
-    directionconf >> v_x >> v_y >> v_z;
+    directionconf >> vi[0] >> vi[1] >> vi[2];
   }
   else if (directionmode == "cosmic"){
-    directionconf >> v_x >> v_y >> v_z;
+    directionconf >> vi[0] >> vi[1] >> vi[2];
   }  
   else if (directionmode == "flat"){
-    directionconf >> v_x >> v_y >> v_z >> phi_max;
+    directionconf >> vi[0] >> vi[1] >> vi[2] >> phi_max;
     phi_max*=conv;
   }
   else if (directionmode == "gauss"){
-    directionconf >> v_x >> v_y >> v_z >> phi_max;
+    directionconf >> vi[0] >> vi[1] >> vi[2] >> phi_max;
     phi_max*=conv;
   }
   else if(directionmode != "custom"){
@@ -137,17 +148,17 @@ Source::Source(std::mt19937 MT, Config config)
     exit(1);
   }
   
-  Normalize(v_x, v_y, v_z);  
-
-  cost=v_z;
+  Normalize(vi);
+  
+  cost=vi[2];
   sint=sqrt(1-cost*cost);
   if(sint!=0){
-    cosp=v_x/sint;
+    cosp=vi[0]/sint;
   }
   else{
     cosp=1;
   }
-  if(v_y >= 0){
+  if(vi[1] >= 0){
     sinp=sqrt(1-cosp*cosp);
   }
   else{
@@ -159,10 +170,11 @@ Source::Source(std::mt19937 MT, Config config)
 Source::~Source()
 {
 }
-void Source::Generate(Position& pos, Direction& vec)
+void Source::Generate(Position& pos, Direction& vec, Direction& pol)
 {
   pos=PointInSource();
   vec=ParticleDir();
+  pol=Polarize(vec);
 }
 Position Source::PointInSource(){//Randomely determine a point in the source volume or surface.
   
@@ -296,7 +308,7 @@ Direction Source::ParticleDir(){//Randomely determine the initial direction of t
   }
   else{//directionmode == "custom"
     vec=CustomDirection(mt);
-    Normalize(vec[0], vec[1], vec[2]);
+    Normalize(vec);
     return vec;
   }
   ang=unirand(mt)*2*pi;
@@ -317,14 +329,38 @@ void Source::Compare(double &A_max, double &A_min, double A){//Update the minimu
   if(A_min > A) A_min = A;
   if(A_max < A) A_max = A;
 }
-void Source::Normalize(double &vx, double &vy, double &vz){//Normalize the vector norm.
-  double norm=vx*vx+vy*vy+vz*vz;
-  vx/=norm;
-  vy/=norm;
-  vz/=norm;
-}
 double Source::CalcBeta(double m, double T){
   double E = T + m;
   double gamma = E / m;
   return std::sqrt(1.0 - 1.0 / (gamma * gamma));
+}
+Direction Source::Polarize(const Direction& v) {
+  // Construct base polarization direction orthogonal to v (deterministic)
+  Direction p,p_aligned;
+  if (fabs(v[2]) < 0.99) {
+    p_aligned = {-v[1], v[0], 0.0};
+  } else {
+    p_aligned = {0.0, -v[2], v[1]};
+  }
+  Normalize(p_aligned);
+
+  // Generate random orthogonal vector to v
+  Direction u2;
+  Cross(v, p_aligned, u2);
+  Normalize(u2);
+
+  // Create random polarization direction in the plane orthogonal to v
+  double phi = 2.0 * pi * unirand(mt);
+  Direction p_rand;
+  for (int i = 0; i < 3; ++i) {
+    p_rand[i] = cos(phi) * p_aligned[i] + sin(phi) * u2[i];
+  }
+  Normalize(p_rand);
+
+  // Interpolate between deterministic and random polarization
+  for (int i = 0; i < 3; ++i) {
+    p[i] = polar * p_aligned[i] + (1.0 - polar) * p_rand[i];
+  }
+  Normalize(p);
+  return p;
 }

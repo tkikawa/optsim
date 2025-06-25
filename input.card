@@ -38,7 +38,8 @@ Index 1.0
 # charged: charged particles are generated in the first step
 #########################################
 
-photon
+#photon			polarization [0-1, 0: no polarization, 1: full polarization]
+photon			0
 
 #charged_particle	energy(MeV)
 #electron 		1000

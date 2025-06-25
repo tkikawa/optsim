@@ -35,13 +35,11 @@ private:
   void Initialize();
   int FType(int bt);
   void Summary();
-  bool Fresnel(const Direction& v, Direction& newv, Direction norm, double idx_in, double idx_out);
-  void Specular(const Direction& v, Direction& newv, const Direction& norm);
-  void Lambert(const Direction& v, Direction& newv, Direction norm);
-  void Rayleigh(const Direction& v, Direction& newv);
-  void Mie(const Direction& v, Direction& newv);
-  void Normalize(Direction& v);
-  void Isotropic(Direction& v);
+  bool Fresnel(const Direction& v, const Direction& p, Direction& newv, Direction& newp, Direction norm, double idx_in, double idx_out);
+  void Specular(const Direction& v, const Direction& p, Direction& newv, Direction& newp, Direction norm);
+  void Lambert(const Direction& v, Direction& newv, Direction& newp, Direction norm);
+  void Rayleigh(const Direction& v, const Direction& p, Direction& newv, Direction& newp);
+  void Mie(const Direction& v, const Direction& p, Direction& newv, Direction& newp);
   std::mt19937 mt;
   std::uniform_real_distribution<double> unirand;
   std::string output;
@@ -52,8 +50,8 @@ private:
   int nevt, nph;
   double index0, yield, delay, wlmin, wlmax,gmie;
   std::string sci_type;
-  Position pos,vec,cross,cand,newpos;
-  Direction newvec,normal;
+  Position pos,vec,pol,cross,cand,newpos;
+  Direction newvec,newpol,normal;
   double index,newindex,attlen,newattlen,scatlen,newscatlen;
   int matid, newmatid, btype, mn, newmn;
   double pl,apl,spl;
@@ -63,8 +61,8 @@ private:
   TFile *file;
   TTree *tree;
   TTree *charged;
-  double ipos[3],fpos[3],ivec[3],fvec[3],time,length;//Branch variables for TTree *tree
-  int imat, fmat, ftype, nref, npas, id;                 //Branch variables for TTree *tree
+  double ipos[3],fpos[3],ivec[3],fvec[3],ipol[3],fpol[3],time,length; //Branch variables for TTree *tree
+  int imat, fmat, ftype, nref, npas, id;              //Branch variables for TTree *tree
 };
 
 #endif

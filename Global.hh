@@ -26,5 +26,10 @@ using Direction = std::array<double, 3>;
 Position CustomSource(std::mt19937 mt);
 Direction CustomDirection(std::mt19937 mt);
 void ReadInFile(const char *inpath, Config &vars);//Read variables from input card file into map
+void Normalize(Direction& v);
+void Isotropic(std::mt19937 mt, Direction& v);
+void RandomPolarization(std::mt19937 mt, const Direction& v, Direction& p);
+double Dot(const Direction& a, const Direction& b);
+void Cross(const Direction& a, const Direction& b, Direction& out);
 
 #endif

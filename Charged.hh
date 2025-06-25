@@ -16,7 +16,7 @@ public:
   Charged(std::mt19937 MT, std::vector<Material*> &MAT);
   virtual ~Charged();
   void Simulate(const Position& pos, const Direction& vec);
-  double Generate(Position& pos, Direction& vec, int n);
+  void Generate(Position& pos, Position& vec, Position& pol, double& t, int n);
   int GetNPhotons();
   void SetBeta(double BETA);
   void SetScinti(std::string sci_type, double YIELD, double DELAY);
@@ -25,8 +25,8 @@ public:
 private:
   double Distance(const Position& p1, const Position& p2);
   Position Interpolate(const Position& p1, const Position& p2, double t);
-  Direction Isotropic();
-  Direction CherenkovDir(double index, const Direction& vec);
+  void ScintiDir(Direction& vsci, Direction& psci);
+  void CherenkovDir(double index, const Direction& vec, Direction& vche, Direction& pche);
   int NumPhoton(double d, double prob, bool is_scinti);
   void CalcSciPar();
   double CalcCheProb(double n);
@@ -35,10 +35,10 @@ private:
   std::uniform_real_distribution<double> unirand;
   std::vector<Material*> mat;
   Position crs,ptn,far;
-  Direction dir;
+  Direction dir, plr;
   double time;
   std::vector<Position> cross;
-  std::vector<std::tuple<Position, Position, double>> particle;
+  std::vector<std::tuple<Position, Direction, Direction, double>> particle;
   double cheprob,dedx,width_pp,p_sci,p_che,dist,s;
   int n_sci,n_che;
   double wlmin, wlmax, yield, A, Z, I, density, beta, scinti_lifetime;

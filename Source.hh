@@ -9,21 +9,20 @@
 #include "Global.hh"
 #include "Geometry.hh"
 
-
 class Source : public Geometry
 {
 public:
   Source(std::mt19937 MT, Config config);
   virtual ~Source();
-  void Generate(Position& pos, Direction& vec);
+  void Generate(Position& pos, Direction& vec, Direction& pol);
   Position PointInSource();
   Direction ParticleDir();
+  Direction Polarize(const Direction& v);
   bool ChargedMode();
   double GetBeta();
 
 private:
   void Compare(double &A_max, double &A_min, double A);
-  void Normalize(double &vx, double &vy, double &xz);
   double CalcBeta(double m, double T);
   std::string sourcemode;
   std::string particlemode;
@@ -33,10 +32,10 @@ private:
   double r_min, r_max, phi_min, phi_max, r;
   double topsurf, insurf, outsurf, xsurf, ysurf, zsurf, totsurf;
   std::string sourcefile;
-  double v_x, v_y, v_z;
+  Direction vi;
   double cost,sint,cosp,sinp;
   double rz,vr,ang;
-  double mass,energy,beta;
+  double mass,energy,beta,polar;
 };
 
 #endif
