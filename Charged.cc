@@ -208,7 +208,23 @@ void Charged::CalcSciPar(){
   double Wmax = (2.0 * me * beta2 * gamma2) /
                   (1.0 + 2.0 * gamma * me / 105.658 + std::pow(me / 105.658, 2));
   double arg = (2.0 * me * beta2 * gamma2 * Wmax) / (I * I);
-  dedx = K * (Z / A) * density * (1.0 / beta2) * (0.5 * std::log(arg) - beta2) / 10.; // dE/dx (MeV/mm)
+
+  // Density effect correction δ(βγ)
+  double delta = 0.0;
+  double X = log10(beta*gamma);
+  if (X < 0.2) {
+    delta = 0.0;
+  } else if (X < 3.0) {
+    // Example: parametrization (refer to ICRU or PDG recommended data)
+    delta = 2 * log(10) * (X - 0.2); // Example approximation
+  } else {
+    delta = 2 * log(10) * X - 1.0; // High-energy asymptotic behavior
+  }
+
+  // Shell correction C/Z (approx: ~0.2 for light elements)
+  double shell_correction = 0.2; // Should be adjusted using empirical formula by Z
+  
+  dedx = K * (Z / A) * density * (1.0 / beta2) * (0.5 * std::log(arg) - beta2 - delta / 2.0 - shell_correction / Z) / 10.; // dE/dx (MeV/mm)
   width_pp = 0.5 * K * (Z / A) * density * (1.0 / beta2) / 10.; // scaling parameter per path (MeV/mm)
 }
 
