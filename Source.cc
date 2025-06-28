@@ -1,7 +1,7 @@
 #include "Source.hh"
 
 Source::Source(std::mt19937 MT, Config config)
-  : Geometry(MT), mass(0), energy(0), beta(0.96), polar(0)
+  : Geometry(MT), mass(0), energy(0), beta(0.96), polar(0), is_electron(false)
 {
   if(config["Source"].size()==0){
     std::cerr<<"Error: Souce is not defined in the input card file."<<std::endl;
@@ -85,6 +85,7 @@ Source::Source(std::mt19937 MT, Config config)
   }
   else if (particlemode == "electron"){
     charged = true;
+    is_electron = true;
     mass=0.511;
     particleconf >> energy;
   }
@@ -316,7 +317,8 @@ Direction Source::ParticleDir(){//Randomely determine the initial direction of t
   v[1]=vr*sin(ang);
   vec[0]=-sinp*v[0] +cost*cosp*v[1] +sint*cosp*v[2];
   vec[1]=cosp*v[0]  +cost*sinp*v[1] +sint*sinp*v[2];
-  vec[2]=           -sint*v[1]      +cost*v[2];  
+  vec[2]=           -sint*v[1]      +cost*v[2];
+  Normalize(vec);
   return vec;
 }
 bool Source::ChargedMode(){
@@ -324,6 +326,9 @@ bool Source::ChargedMode(){
 }
 double Source::GetBeta(){
   return beta;
+}
+bool Source::IsElectron(){
+  return is_electron;
 }
 void Source::Compare(double &A_max, double &A_min, double A){//Update the minimum and maximum points of a coordinate.
   if(A_min > A) A_min = A;

@@ -331,7 +331,7 @@ The ROOT file contains a TTree \*photon for the interaction history of optical p
 | fvec\[3] | Final direction (x, y, z)                                                                                       |
 | ipol\[3] | Initial polarization (x, y, z)                                                                                  |
 | fpol\[3] | Final polarization (x, y, z)                                                                                    |
-| time     | Time from creation to termination in ns                                                                         |
+| time     | Time from creation of primary particle to termination of photon in ns                                           |
 | length   | Total photon path length in mm                                                                                  |
 | imat     | Material ID at photon generation                                                                                |
 | fmat     | Material ID at photon termination                                                                               |

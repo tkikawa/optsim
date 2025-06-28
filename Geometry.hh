@@ -21,6 +21,7 @@ public:
   int NTriangle(){return triangle.size();}
   Triangle GetTriangle(int n){return triangle[n];}
   bool InSolid(const Position& pos);
+  double Round(double p0);
   std::mt19937 mt;
   std::vector<Triangle> triangle;
   std::uniform_real_distribution<double> unirand;

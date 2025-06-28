@@ -33,9 +33,9 @@ void Geometry::LoadCAD(std::string name){//Read out the input CAD file as a asse
   for(unsigned int i=0; i < aim->mNumFaces; i++){
     const aiFace& face = aim->mFaces[i];
     for(int j=0;j<3;j++){
-      vertex[j][0]=aim->mVertices[face.mIndices[j]].x*cadunit;
-      vertex[j][1]=aim->mVertices[face.mIndices[j]].y*cadunit;
-      vertex[j][2]=aim->mVertices[face.mIndices[j]].z*cadunit;
+      vertex[j][0]=Round(aim->mVertices[face.mIndices[j]].x*cadunit);
+      vertex[j][1]=Round(aim->mVertices[face.mIndices[j]].y*cadunit);
+      vertex[j][2]=Round(aim->mVertices[face.mIndices[j]].z*cadunit);
     }
     Triangle *tri = new Triangle(vertex);
     triangle.push_back(*tri);
@@ -51,4 +51,8 @@ bool Geometry::InSolid(const Position& pos){//Check if the point is inside or ou
   }
   if(ncol%2 == 1) return true;
   else            return false;
+}
+double Geometry::Round(double p0){
+  double eps = 1e-5;
+  return std::round(p0 / eps) * eps;
 }

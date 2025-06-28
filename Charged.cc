@@ -4,7 +4,8 @@ Charged::Charged(std::mt19937 MT, std::vector<Material*> &MAT)
   :mt(MT),
    mat(MAT),
    act_sci(false),
-   act_che(false)
+   act_che(false),
+   is_electron(false)
 {
   std::uniform_int_distribution<int> seed_dist(0, std::numeric_limits<int>::max());
   int seed = seed_dist(mt);
@@ -161,6 +162,10 @@ void Charged::SetBeta(double BETA){
   beta=BETA;
 }
 
+void Charged::SetElectron(bool is_e){
+  is_electron = is_e;
+}
+
 void Charged::SetScinti(std::string sci_type, double YIELD, double DELAY){
   act_sci=true;
   yield = YIELD;
@@ -188,7 +193,7 @@ void Charged::SetCherenkov(double WLMIN, double WLMAX){
   wlmin=WLMIN;
   wlmax=WLMAX;
 }
-double Charged::CalcCheProb(double n){
+double Charged::CalcCheProb(double n){// Calculate expected Chrenkov photon yield following Frank–Tamm formula
   const double alpha = 1.0 / 137.035999; // Fine-structure constant
   const double nm_to_cm = 1e-7;
   double wlmin_cm = wlmin * nm_to_cm;
@@ -204,27 +209,52 @@ void Charged::CalcSciPar(){
   const double me = 0.511;   // MeV/c^2
   double beta2 = beta * beta;
   double gamma= 1 / sqrt(1-beta2);
+  double X = log10(beta*gamma);
+  double delta = 0.0;
+
+  //Sternheimer paramters
+  double X0 = 0.2;
+  double X1 = 3.0;
+  double C = 4.0;
+  
+  if(!is_electron){//Calculate dE/dx following Bethe-Broch formula.
   double gamma2 = gamma * gamma;
   double Wmax = (2.0 * me * beta2 * gamma2) /
                   (1.0 + 2.0 * gamma * me / 105.658 + std::pow(me / 105.658, 2));
   double arg = (2.0 * me * beta2 * gamma2 * Wmax) / (I * I);
 
-  // Density effect correction δ(βγ)
-  double delta = 0.0;
-  double X = log10(beta*gamma);
-  if (X < 0.2) {
+  // Density effect correction
+  if (X < X0) {
     delta = 0.0;
-  } else if (X < 3.0) {
+  } else if (X < X1) {
     // Example: parametrization (refer to ICRU or PDG recommended data)
-    delta = 2 * log(10) * (X - 0.2); // Example approximation
+    delta = 2 * log(10) * (X - X0); // Example approximation
   } else {
-    delta = 2 * log(10) * X - 1.0; // High-energy asymptotic behavior
+    delta = 2 * log(10) * X - C; // High-energy asymptotic behavior
   }
 
   // Shell correction C/Z (approx: ~0.2 for light elements)
   double shell_correction = 0.2; // Should be adjusted using empirical formula by Z
   
   dedx = K * (Z / A) * density * (1.0 / beta2) * (0.5 * std::log(arg) - beta2 - delta / 2.0 - shell_correction / Z) / 10.; // dE/dx (MeV/mm)
+  }
+  else{//Calculate dE/dx following Berger-Seltzer formula.
+    double tau = gamma - 1.0;
+    double T = tau * me;
+    double F = 1.0 - beta2 + std::log(1.0 + pow(tau, 2) / 2.0); // F(tau): correction due to indistinguishability
+
+    // Density effect correction
+    if (X < X0) {
+      delta = 0.0;
+    } else if (X < X1) {
+      delta = 2.0 * log(10.0) * pow(X - X0, 2);
+    } else {
+      delta = 2.0 * log(10.0) * X - C;
+    }
+    
+    dedx = K * (Z / A) * density * (1.0 / beta2) * (std::log(T / I) + F - delta - 2.0) /10.;// dE/dx (MeV/mm)
+  }
+
   width_pp = 0.5 * K * (Z / A) * density * (1.0 / beta2) / 10.; // scaling parameter per path (MeV/mm)
 }
 

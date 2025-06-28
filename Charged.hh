@@ -19,6 +19,7 @@ public:
   void Generate(Position& pos, Position& vec, Position& pol, double& t, int n);
   int GetNPhotons();
   void SetBeta(double BETA);
+  void SetElectron(bool is_e);
   void SetScinti(std::string sci_type, double YIELD, double DELAY);
   void SetCherenkov(double WLMIN, double WLMAX);
     
@@ -42,7 +43,7 @@ private:
   double cheprob,dedx,width_pp,p_sci,p_che,dist,s;
   int n_sci,n_che;
   double wlmin, wlmax, yield, A, Z, I, density, beta, scinti_lifetime;
-  bool act_sci,act_che;
+  bool act_sci,act_che,is_electron;
   TRandom3 rng;
 };
 

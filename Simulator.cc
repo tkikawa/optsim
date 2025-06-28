@@ -59,7 +59,10 @@ Simulator::Simulator(std::mt19937 MT, Config config, std::string OUTPUT, Source 
     exit(1);
   }
   chg = new Charged(mt,mat);
-  if(act_scinti||act_cherenkov)chg->SetBeta(src->GetBeta());
+  if(act_scinti||act_cherenkov){
+    chg->SetBeta(src->GetBeta());
+    chg->SetElectron(src->IsElectron());
+  }
   if(act_scinti)chg->SetScinti(sci_type,yield,delay);
   if(act_cherenkov)chg->SetCherenkov(wlmin,wlmax);
 }
@@ -162,20 +165,22 @@ void Simulator::Run(){//Run simulation
 	btype = -2;
 	for(int j=0;j<3;j++)cross[j]=pos[j]+vec[j]*world;//far point on the straight-line of the track
 	for(unsigned int m=0;m<mat.size();m++){//loop for Materials
-	  if(matid!=0&&matid<mat[m]->ID()&&btype>-1){
-	    goto ENDLOOP;
-	  }
-	  else if(matid!=0&&matid<mat[m]->ID()&&btype==-1){
-	    if(mat[m]->InSolid(cross)){
-	      newmatid=mat[m]->ID();
-	      newindex=mat[m]->Index();
-	      newattlen=mat[m]->AttLen();
-	      newscatlen=mat[m]->ScatLen();
-	      btype=mat[m]->Type();
-	      newmn=m;
-	      goto ENDLOOP;
+	  if(matid!=0&&matid<mat[m]->ID()){
+	    if(btype>-1){
+	      break;
 	    }
-	    continue;
+	    else if(btype==-1){
+	      if(mat[m]->InSolid(cross)){
+		newmatid=mat[m]->ID();
+		newindex=mat[m]->Index();
+		newattlen=mat[m]->AttLen();
+		newscatlen=mat[m]->ScatLen();
+		btype=mat[m]->Type();
+		newmn=m;
+		break;
+	      }
+	      continue;
+	    }
 	  }
 	  for(int t=0;t<mat[m]->NTriangle();t++){//loop for Triangles
 	    if(mat[m]->GetTriangle(t).Collision(pos,cross,cand)){//Check if a line between two points collides with the triangle or not
@@ -211,8 +216,6 @@ void Simulator::Run(){//Run simulation
 	    }//end of if
 	  }//end of for
 	}//end of for
- 
-      ENDLOOP:
 	if(btype!=-2){
 	  pl=sqrt(pow(newpos[0]-pos[0],2)+pow(newpos[1]-pos[1],2)+pow(newpos[2]-pos[2],2));
 	  if(attlen>0||scatlen>0){//When attlen==0 (scatlen==0), absorption (scattering) in the medium does not occur.

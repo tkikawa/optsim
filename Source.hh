@@ -20,6 +20,7 @@ public:
   Direction Polarize(const Direction& v);
   bool ChargedMode();
   double GetBeta();
+  bool IsElectron();
 
 private:
   void Compare(double &A_max, double &A_min, double A);
@@ -36,6 +37,7 @@ private:
   double cost,sint,cosp,sinp;
   double rz,vr,ang;
   double mass,energy,beta,polar;
+  bool is_electron;
 };
 
 #endif

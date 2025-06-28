@@ -39,7 +39,6 @@ public:
   void Compare(double &A_max, double &A_min, double A);
   bool ComparePosition(const Position& p0, const Position& p1);
   bool Parallel(const Direction& p0, const Direction& p1);
-  Position Round(const Position& p0);
   void DrawGeometry();
   void SetGeometry();
   void CloseWindow();

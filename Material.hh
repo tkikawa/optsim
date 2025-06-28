@@ -11,13 +11,13 @@ class Material : public Geometry
 public:
   Material(std::mt19937 MT, int ID, std::string MATFILE, std::string TYPE, double INDEX, double ATTLEN, double SCATLEN);
   virtual ~Material();
-  virtual int Type(){return type;}
-  virtual int TType(){return type;}
-  int ID(){return id;}
-  double Index(){return index;}
-  double AttLen(){return attlen;}
-  double ScatLen(){return scatlen;}
-  virtual bool Is_Scinti(){return is_scinti;}
+  virtual int Type() const {return type;}
+  virtual int TType() const {return type;}
+  int ID() const {return id;}
+  double Index() const {return index;}
+  double AttLen() const {return attlen;}
+  double ScatLen() const {return scatlen;}
+  virtual bool Is_Scinti() const {return is_scinti;}
 
 private:
   int id, type;

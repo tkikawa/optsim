@@ -206,14 +206,6 @@ bool Gui::ComparePosition(const Position& p0, const Position& p1){
 bool Gui::Parallel(const Direction& n0, const Direction& n1){
   return fabs(n0[0]*n1[0] + n0[1]*n1[1] + n0[2]*n1[2]) > 0.999;
 }
-Position Gui::Round(const Position& p0){
-  double eps = 1e-5;
-  return {
-          std::round(p0[0] / eps) * eps,
-          std::round(p0[1] / eps) * eps,
-          std::round(p0[2] / eps) * eps
-  };
-}
 void Gui::SetGeometry(){
   x_min = y_min = z_min = world;
   x_max = y_max = z_max = -world;
@@ -222,8 +214,8 @@ void Gui::SetGeometry(){
     edge_to_norm.clear();
     for(int t=0;t<sim->GetMaterial(m)->NTriangle();t++){//loop for Triangles
       for(int j=0;j<3;j++){
-        Position p1 = Round({ sim->GetMaterial(m)->GetTriangle(t).X(j),       sim->GetMaterial(m)->GetTriangle(t).Y(j),       sim->GetMaterial(m)->GetTriangle(t).Z(j) });
-        Position p2 = Round({ sim->GetMaterial(m)->GetTriangle(t).X((j+1)%3), sim->GetMaterial(m)->GetTriangle(t).Y((j+1)%3), sim->GetMaterial(m)->GetTriangle(t).Z((j+1)%3) });
+        Position p1 = { sim->GetMaterial(m)->GetTriangle(t).X(j),       sim->GetMaterial(m)->GetTriangle(t).Y(j),       sim->GetMaterial(m)->GetTriangle(t).Z(j) };
+        Position p2 = { sim->GetMaterial(m)->GetTriangle(t).X((j+1)%3), sim->GetMaterial(m)->GetTriangle(t).Y((j+1)%3), sim->GetMaterial(m)->GetTriangle(t).Z((j+1)%3) };
         if(ComparePosition(p1,p2))std::swap(p1, p2);
         edge_to_norm[{p1, p2}].push_back(sim->GetMaterial(m)->GetTriangle(t).GetNormal());
         Compare(x_max, x_min, p1[0]);

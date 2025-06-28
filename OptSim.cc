@@ -12,6 +12,7 @@
 #include <sstream>
 #include <random>
 #include <regex>
+#include <algorithm>
 #include <getopt.h>
 #include <sys/time.h>
 #include <TApplication.h>
