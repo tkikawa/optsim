@@ -35,14 +35,9 @@ private:
   std::mt19937 mt;
   std::uniform_real_distribution<double> unirand;
   std::vector<Material*> mat;
-  Position crs,ptn,far;
-  Direction dir, plr;
-  double time;
-  std::vector<Position> cross;
   std::vector<std::tuple<Position, Direction, Direction, double>> particle;
-  double cheprob,dedx,width_pp,p_sci,p_che,dist,s;
-  int n_sci,n_che;
-  double wlmin, wlmax, yield, A, Z, I, density, beta, scinti_lifetime;
+  double dedx,width_pp;
+  double wlmin, wlmax, Z, A, density, I, yield, beta, scinti_lifetime;
   bool act_sci,act_che,is_electron;
   TRandom3 rng;
 };

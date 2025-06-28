@@ -70,8 +70,22 @@ Simulator::~Simulator()
 {
 }
 void Simulator::Run(){//Run simulation
-  file = new TFile(output.c_str(), "recreate");//Output ROOT file
-  tree = new TTree("photon","photon");
+
+  Position pos,vec,pol,cross,cand,newpos;
+  Direction newvec,newpol,normal;
+  double index=1,newindex=1,attlen=0,newattlen=0,scatlen=0,newscatlen=0;
+  int matid=0, newmatid=0, btype, mn, newmn;
+  double pl,apl,spl;
+  
+  double ipos[3],fpos[3],ivec[3],fvec[3],ipol[3],fpol[3],time,length; //Branch variables for TTree *tree
+  int imat, fmat, ftype, nref, npas, id;                              //Branch variables for TTree *tree
+
+  double cpos[3],cvec[3]; //Branch variables for TTree *charged
+  int nph, ntype[5];      //Branch variables for TTree *charged
+  
+  TFile *file = new TFile(output.c_str(), "recreate");//Output ROOT file
+  TTree *tree = new TTree("photon","photon");
+  TTree *charged = new TTree("charged","charged");
   tree->Branch("ipos[3]",&ipos,"ipos[3]/D");//Initial position of optical photon (mm). [0], [1], [2] for x, y, z.
   tree->Branch("fpos[3]",&fpos,"fpos[3]/D");//Final position of optical photon (mm). [0], [1], [2] for x, y, z.
   tree->Branch("ivec[3]",&ivec,"ivec[3]/D");//Initial direction of optical photon. [0], [1], [2] for x, y, z.
@@ -87,11 +101,11 @@ void Simulator::Run(){//Run simulation
   tree->Branch("npas",&npas,"npas/I");//Number of transmissions of optical photon in boundaries.
   if(src->ChargedMode()){
     tree->Branch("id",&id,"id/I");//ID of corresponding charged particle.
-
-    charged = new TTree("charged","charged");
-    charged->Branch("ipos[3]",&pos,"ipos[3]/D");//Initial position of charged particle (mm). [0], [1], [2] for x, y, z.
-    charged->Branch("ivec[3]",&vec,"ivec[3]/D");//Initial direction of charged particle (mm). [0], [1], [2] for x, y, z.
-    charged->Branch("nph",&nph,"nph/I");//Number of produced photons
+ 
+    charged->Branch("ipos[3]",&cpos,"ipos[3]/D");//Initial position of charged particle (mm). [0], [1], [2] for x, y, z.
+    charged->Branch("ivec[3]",&cvec,"ivec[3]/D");//Initial direction of charged particle (mm). [0], [1], [2] for x, y, z.
+    charged->Branch("nph",&nph,"nph/I");//Number of produced photons by the charged particle
+    charged->Branch("ntype[5]",&ntype,"ntype[5]/I");//Number of photons in each end process
     charged->Branch("id",&id,"id/I");//ID for charged particles.
   }
   
@@ -130,8 +144,12 @@ void Simulator::Run(){//Run simulation
       }
       chg->Simulate(pos, vec);//Simualtion for charged particles.
       nph=chg->GetNPhotons();
+      for(int j=0;j<3;j++){
+	cpos[j]=pos[j];
+	cvec[j]=vec[j];
+      }
+      for(int j=0;j<5;j++)ntype[j]=0;
       id=i;
-      charged->Fill();
     }
     else nph=1;
     for(int p=0;p<nph;p++){
@@ -160,7 +178,21 @@ void Simulator::Run(){//Run simulation
 	attlen=0;
 	scatlen=0;
       }
-      Initialize();
+
+      //Initialization of variables
+      for(int j=0;j<3;j++){
+	ipos[j]=pos[j];
+	ivec[j]=vec[j];
+	ipol[j]=pol[j];
+	newpos[j]=pos[j];
+	newvec[j]=vec[j];
+	newpol[j]=pol[j];
+      }
+      imat=matid;
+      nref=0;
+      npas=0;
+      length=0;
+      
       while(1){
 	btype = -2;
 	for(int j=0;j<3;j++)cross[j]=pos[j]+vec[j]*world;//far point on the straight-line of the track
@@ -301,9 +333,11 @@ void Simulator::Run(){//Run simulation
       }
       fmat=newmatid;
       ftype=FType(btype);//Conversion of type ID.
-      tree->Fill();
+      tree->Fill();      
       count[ftype]++;
+      if(src->ChargedMode())ntype[ftype]++;
     }//end of for
+    if(src->ChargedMode())charged->Fill();
   }//end of for
   if(!displaymode){
     Summary();
@@ -323,20 +357,6 @@ int Simulator::PointMaterial(const Position& p){//Check the material of initial 
     }
   }
   return -1;
-}
-void Simulator::Initialize(){//Initialize the variables.
-  for(int j=0;j<3;j++){
-    ipos[j]=pos[j];
-    ivec[j]=vec[j];
-    ipol[j]=pol[j];
-    newpos[j]=pos[j];
-    newvec[j]=vec[j];
-    newpol[j]=pol[j];
-  }
-  imat=matid;
-  nref=0;
-  npas=0;
-  length=0;
 }
 int Simulator::FType(int bt){//Conver the temporary type ID to final type ID
   if(bt==-2)return 0;     //Go out of world volume.

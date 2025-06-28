@@ -342,12 +342,13 @@ The ROOT file contains a TTree \*photon for the interaction history of optical p
 
 In the charged particle mode, the ROOT file contains additional TTree \*charged for the track of charged particle with the following branches:
 
-| Branch   | Description                                                                                          |
-| -------- | ---------------------------------------------------------------------------------------------------- |
-| ipos\[3] | Initial position (x, y, z) in mm                                                                     |
-| ivec\[3] | Initial direction (x, y, z)                                                                          |
-| nph      | Number of produced photons                                                                           |
-| id       | ID of charged particle. (used to associate the charged particle information with photon information) |
+| Branch    | Description                                                                                                                                    |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| ipos\[3]  | Initial position (x, y, z) in mm                                                                                                               |
+| ivec\[3]  | Initial direction (x, y, z)                                                                                                                    |
+| nph       | Number of produced photons by the charged particle                                                                                             |
+| ntype\[5] | Number of photons in each end process ([0] out of world, [1] reflection limit, [2] absorbed in medium, [3] absorbed by absorber, [4] detected) |
+| id        | ID of charged particle. (used to associate the charged particle information with photon information)                                           |
 
 ## 8. Simulation Process
 

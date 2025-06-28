@@ -32,7 +32,6 @@ public:
   
 private:
   int PointMaterial(const Position& p);
-  void Initialize();
   int FType(int bt);
   void Summary();
   bool Fresnel(const Direction& v, const Direction& p, Direction& newv, Direction& newp, Direction norm, double idx_in, double idx_out);
@@ -47,22 +46,11 @@ private:
   Charged *chg;
   Gui *gui=nullptr;
   std::vector<Material*> mat;
-  int nevt, nph;
+  int nevt;
   double index0, yield, delay, wlmin, wlmax,gmie;
   std::string sci_type;
-  Position pos,vec,pol,cross,cand,newpos;
-  Direction newvec,newpol,normal;
-  double index,newindex,attlen,newattlen,scatlen,newscatlen;
-  int matid, newmatid, btype, mn, newmn;
-  double pl,apl,spl;
   bool displaymode,act_scinti,act_cherenkov,usemie;
   std::array<int, 5> count;
-  double x_min, x_max, y_min, y_max, z_min, z_max, r_max;
-  TFile *file;
-  TTree *tree;
-  TTree *charged;
-  double ipos[3],fpos[3],ivec[3],fvec[3],ipol[3],fpol[3],time,length; //Branch variables for TTree *tree
-  int imat, fmat, ftype, nref, npas, id;              //Branch variables for TTree *tree
 };
 
 #endif

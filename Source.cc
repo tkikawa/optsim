@@ -1,7 +1,7 @@
 #include "Source.hh"
 
 Source::Source(std::mt19937 MT, Config config)
-  : Geometry(MT), mass(0), energy(0), beta(0.96), polar(0), is_electron(false)
+  : Geometry(MT), beta(0.96), polar(0), is_electron(false)
 {
   if(config["Source"].size()==0){
     std::cerr<<"Error: Souce is not defined in the input card file."<<std::endl;
@@ -73,7 +73,8 @@ Source::Source(std::mt19937 MT, Config config)
   }  
   particlemode = config["Particle"].begin()->first; // only first particle in input card file is read in
   std::istringstream particleconf(config["Particle"].begin()->second);
-  std::cout<<"Particle type is "<<particlemode<<"."<<std::endl;  
+  std::cout<<"Particle type is "<<particlemode<<"."<<std::endl;
+  double mass=0, energy=0;
   if (particlemode == "photon"){
     charged = false;
     particleconf >> polar;
@@ -125,6 +126,7 @@ Source::Source(std::mt19937 MT, Config config)
   directionmode = config["Direction"].begin()->first; // only first direction in input card file is read in
   std::istringstream directionconf(config["Direction"].begin()->second);
   std::cout<<"Direction type is "<<directionmode<<"."<<std::endl;
+  Direction vi;
   if (directionmode == "isotropic"){
     vi[0]=0; vi[1]=0; vi[2]=1; phi_max=180;
     phi_max*=conv;
@@ -288,6 +290,7 @@ Position Source::PointInSource(){//Randomely determine a point in the source vol
 }
 Direction Source::ParticleDir(){//Randomely determine the initial direction of the primary particle
   Direction vec,v;
+  double vr;
   if (directionmode == "isotropic" || directionmode == "flat"){
     v[2]=1+unirand(mt)*(rz-1);
     vr=sqrt(1-v[2]*v[2]);
@@ -312,7 +315,7 @@ Direction Source::ParticleDir(){//Randomely determine the initial direction of t
     Normalize(vec);
     return vec;
   }
-  ang=unirand(mt)*2*pi;
+  double ang=unirand(mt)*2*pi;
   v[0]=vr*cos(ang);
   v[1]=vr*sin(ang);
   vec[0]=-sinp*v[0] +cost*cosp*v[1] +sint*cosp*v[2];

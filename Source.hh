@@ -33,10 +33,7 @@ private:
   double r_min, r_max, phi_min, phi_max, r;
   double topsurf, insurf, outsurf, xsurf, ysurf, zsurf, totsurf;
   std::string sourcefile;
-  Direction vi;
-  double cost,sint,cosp,sinp;
-  double rz,vr,ang;
-  double mass,energy,beta,polar;
+  double cost,sint,cosp,sinp, rz, beta,polar;
   bool is_electron;
 };
 

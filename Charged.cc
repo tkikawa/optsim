@@ -18,6 +18,12 @@ Charged::~Charged()
 
 void Charged::Simulate(const Position& pos, const Direction& vec)
 {
+  double p_sci,p_che,dist,s, time;
+  int n_sci,n_che;
+  Position crs,ptn,far;
+  Direction dir, plr;
+  std::vector<Position> cross;
+  
   particle.clear();
   for(int j=0;j<3;j++)far[j]=pos[j]+vec[j]*world;//far point on the straight-line of the track
   for(unsigned int m=0;m<mat.size();m++){//loop for Materials
