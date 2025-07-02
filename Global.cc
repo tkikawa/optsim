@@ -59,7 +59,7 @@ void ReadInFile(const char *inpath, Config &vars){//Read out the input card file
   }
 }
 void Normalize(Direction& v){//Normalize the vector norm.
-  double norm=v[0]*v[0]+v[1]*v[1]+v[2]*v[2];
+  double norm=sqrt(v[0]*v[0]+v[1]*v[1]+v[2]*v[2]);
   for(int i=0;i<3;i++){
     v[i]/=norm;
   }

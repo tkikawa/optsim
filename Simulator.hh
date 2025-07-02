@@ -6,8 +6,8 @@
 #include "Material.hh"
 #include "Charged.hh"
 #include "Gui.hh"
+#include <cfloat>
 #include <string>
-#include <iostream>
 #include <vector>
 #include <random>
 #include <TFile.h>
@@ -19,7 +19,7 @@
 class Simulator
 {
 public:
-  Simulator(std::mt19937 MT, Config config, std::string OUTPUT, Source *SRC, std::vector<Material*> &MAT);
+  Simulator(std::mt19937& MT, Config config, std::string OUTPUT, Source *SRC, std::vector<Material*> &MAT);
   virtual ~Simulator();
   void Run();
   void SetDisplay(Gui *GUI);
@@ -39,7 +39,7 @@ private:
   void Lambert(const Direction& v, Direction& newv, Direction& newp, Direction norm);
   void Rayleigh(const Direction& v, const Direction& p, Direction& newv, Direction& newp);
   void Mie(const Direction& v, const Direction& p, Direction& newv, Direction& newp);
-  std::mt19937 mt;
+  std::mt19937& mt;
   std::uniform_real_distribution<double> unirand;
   std::string output;
   Source *src;

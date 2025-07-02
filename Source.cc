@@ -1,6 +1,6 @@
 #include "Source.hh"
 
-Source::Source(std::mt19937 MT, Config config)
+Source::Source(std::mt19937& MT, Config config)
   : Geometry(MT), beta(0.96), polar(0), is_electron(false)
 {
   if(config["Source"].size()==0){
@@ -100,6 +100,11 @@ Source::Source(std::mt19937 MT, Config config)
     mass=139.570;
     particleconf >> energy;
   }
+  else if (particlemode == "kaon"){
+    charged = true;
+    mass=493.677;
+    particleconf >> energy;
+  }
   else if (particlemode == "proton"){
     charged = true;
     mass=938.272;
@@ -107,7 +112,7 @@ Source::Source(std::mt19937 MT, Config config)
   }
   else{
     std::cerr<<"Error: Invalid particle type."<<std::endl;
-    std::cerr<<"Particle type must be either photon, electron, muon, pion, proton or alpha."<<std::endl;
+    std::cerr<<"Particle type must be either photon, electron, muon, pion, kaon or proton."<<std::endl;
     exit(1);
   }
   if(charged){

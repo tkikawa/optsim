@@ -4,8 +4,7 @@
 #include <string>
 #include <iostream>
 #include <vector>
-#include <math.h>
-#include <float.h>
+#include <cmath>
 #include "Global.hh"
 
 class Triangle

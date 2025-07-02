@@ -1,6 +1,6 @@
 #include "Material.hh"
 
-Material::Material(std::mt19937 MT, int ID, std::string MATFILE, std::string TYPE, double INDEX=1, double ATTLEN=0, double SCATLEN=0)
+Material::Material(std::mt19937& MT, int ID, std::string MATFILE, std::string TYPE, double INDEX=1, double ATTLEN=0, double SCATLEN=0)
   : Geometry(MT),
     id(ID),
     index(INDEX),

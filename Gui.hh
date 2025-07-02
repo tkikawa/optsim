@@ -1,7 +1,6 @@
 #ifndef GUI_H
 #define GUI_H
 
-#include <iostream>
 #include <vector>
 #include "Global.hh"
 #include <TCanvas.h>

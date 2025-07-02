@@ -7,13 +7,13 @@
 #include <string>
 #include <iostream>
 #include <vector>
-#include <math.h>
-#include <float.h>
+//#include <math.h>
+//#include <float.h>
 
 class Charged
 {
 public:
-  Charged(std::mt19937 MT, std::vector<Material*> &MAT);
+  Charged(std::mt19937& MT, std::vector<Material*> &MAT);
   virtual ~Charged();
   void Simulate(const Position& pos, const Direction& vec);
   void Generate(Position& pos, Position& vec, Position& pol, double& t, int n);
@@ -32,7 +32,7 @@ private:
   void CalcSciPar();
   double CalcCheProb(double n);
   double ScintiDelay();
-  std::mt19937 mt;
+  std::mt19937& mt;
   std::uniform_real_distribution<double> unirand;
   std::vector<Material*> mat;
   std::vector<std::tuple<Position, Direction, Direction, double>> particle;

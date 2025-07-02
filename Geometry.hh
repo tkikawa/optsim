@@ -2,7 +2,6 @@
 #define Geometry_h 1
 
 #include <string>
-#include <iostream>
 #include <vector>
 #include <random>
 #include "Global.hh"
@@ -15,14 +14,14 @@
 class Geometry
 {
 public:
-  Geometry(std::mt19937 MT);
+  Geometry(std::mt19937& MT);
   virtual ~Geometry();
   void LoadCAD(std::string name);
   int NTriangle(){return triangle.size();}
   Triangle GetTriangle(int n){return triangle[n];}
   bool InSolid(const Position& pos);
   double Round(double p0);
-  std::mt19937 mt;
+  std::mt19937& mt;
   std::vector<Triangle> triangle;
   std::uniform_real_distribution<double> unirand;
   std::normal_distribution<double> gausrand;

@@ -2,17 +2,16 @@
 #define Source_h 1
 
 #include <string>
-#include <iostream>
 #include <sstream>
 #include <vector>
-#include <math.h>
+#include <cmath>
 #include "Global.hh"
 #include "Geometry.hh"
 
 class Source : public Geometry
 {
 public:
-  Source(std::mt19937 MT, Config config);
+  Source(std::mt19937& MT, Config config);
   virtual ~Source();
   void Generate(Position& pos, Direction& vec, Direction& pol);
   Position PointInSource();

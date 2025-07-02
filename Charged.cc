@@ -1,6 +1,6 @@
 #include "Charged.hh"
 
-Charged::Charged(std::mt19937 MT, std::vector<Material*> &MAT)
+Charged::Charged(std::mt19937& MT, std::vector<Material*> &MAT)
   :mt(MT),
    mat(MAT),
    act_sci(false),
@@ -190,7 +190,7 @@ void Charged::SetScinti(std::string sci_type, double YIELD, double DELAY){
   density = std::get<2>(scintillators[sci_type]);
   I = std::get<3>(scintillators[sci_type]);
   if(yield==0)yield = std::get<4>(scintillators[sci_type]);
-  if(scinti_lifetime==0)scinti_lifetime = std::get<5>(scintillators[sci_type]);
+  if(scinti_lifetime==-99999)scinti_lifetime = std::get<5>(scintillators[sci_type]);
   CalcSciPar();
 }
 
@@ -265,6 +265,11 @@ void Charged::CalcSciPar(){
 }
 
 double Charged::ScintiDelay(){
-  std::exponential_distribution<double> exp_dist(1.0 / scinti_lifetime);
-  return exp_dist(mt);
+  if(scinti_lifetime<=0) return 0;
+  else{
+    int skip = mt() % 7 + 3;
+    mt.discard(skip);
+    std::exponential_distribution<double> exp_dist(1.0 / scinti_lifetime);
+    return exp_dist(mt);
+  }
 }

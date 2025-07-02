@@ -251,6 +251,7 @@ Defines the type of the primary particles.
 | electron | Electrons as primaries.        | Kinetic energy [MeV] | MIP energy          |
 | muon     | Muons as primaries.            | Kinetic energy [MeV] | MIP energy          |
 | pion     | Charged pions as primaries.    | Kinetic energy [MeV] | MIP energy          |
+| kaon     | Charged kaons as primaries.    | Kinetic energy [MeV] | MIP energy          |
 | proton   | Protons as primaries.          | Kinetic energy [MeV] | MIP energy          |
 
 #### Source

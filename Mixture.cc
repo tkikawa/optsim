@@ -1,6 +1,6 @@
 #include "Mixture.hh"
 
-Mixture::Mixture(std::mt19937 MT, int ID, std::string MATFILE, std::vector<std::pair<double, std::string>> MIX, double INDEX=1, double ATTLEN=0, double SCATLEN=0)
+Mixture::Mixture(std::mt19937& MT, int ID, std::string MATFILE, std::vector<std::pair<double, std::string>> MIX, double INDEX=1, double ATTLEN=0, double SCATLEN=0)
   : Material(MT, ID, MATFILE, "mixture", INDEX, ATTLEN, SCATLEN),
     is_scinti(false)
 {

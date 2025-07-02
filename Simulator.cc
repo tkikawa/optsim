@@ -1,6 +1,6 @@
 #include "Simulator.hh"
 
-Simulator::Simulator(std::mt19937 MT, Config config, std::string OUTPUT, Source *SRC, std::vector<Material*> &MAT)
+Simulator::Simulator(std::mt19937& MT, Config config, std::string OUTPUT, Source *SRC, std::vector<Material*> &MAT)
   : mt(MT),
     output(OUTPUT),
     src(SRC),
@@ -8,7 +8,7 @@ Simulator::Simulator(std::mt19937 MT, Config config, std::string OUTPUT, Source 
     nevt(10000),
     index0(1),
     yield(0),
-    delay(0),
+    delay(-99999),
     wlmin(-99999),
     wlmax(-99999),
     gmie(-99999),
@@ -333,7 +333,7 @@ void Simulator::Run(){//Run simulation
       }
       fmat=newmatid;
       ftype=FType(btype);//Conversion of type ID.
-      tree->Fill();      
+      tree->Fill();
       count[ftype]++;
       if(src->ChargedMode())ntype[ftype]++;
     }//end of for
@@ -342,7 +342,9 @@ void Simulator::Run(){//Run simulation
   if(!displaymode){
     Summary();
   }
-  file->Write();
+  tree->Write();
+  if(src->ChargedMode())charged->Write();
+  file->Purge();
   file->Close();  
 }
 void Simulator::SetDisplay(Gui *GUI){
