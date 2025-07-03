@@ -21,6 +21,9 @@ Index 1.0
 #Cherenkov  minimum_wavelength[nm]  maximum_wavelength[nm]
 #Cherenkov  300			    500
 
+#Photon detection efficiency of detector
+#Efficiency  efficyency[0-1]
+#Efficiency  1
 
 [Material]
 #ID	CADfile					material_type	refractive_index	attnuation_length(mm)	scattering_length(mm)
@@ -45,6 +48,7 @@ photon			0
 #electron 		1000
 #muon 			1000
 #pion 			1000
+#kaon 			1000
 #proton 		1000
 
 [Source]

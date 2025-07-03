@@ -163,10 +163,11 @@ Several parts of a SolidWorks assembly can be exported as follows:
 | Parameter     | Description                                                               | Default  |
 | ------------- | ------------------------------------------------------------------------- | -------- |
 | Number        | Number of primary particles (photons or charged particles)                | 10000    |
-| Index         | Refractive index of surroundings (air)                                    | 1        |
+| Index         | Refractive index of surroundings (air)                                    | 1.       |
 | Mie           | Activate Mie scattering with asymmetric parameters                        | inactive |
 | Scintillation | Activate scintillation with type, yield [photons/MeV] and life time [ns]  | inactive |
-| Cherenkov     | Activate Cherenkov radiation with min. and max. wavelengths [nm]          | inactive | 
+| Cherenkov     | Activate Cherenkov radiation with min. and max. wavelengths [nm]          | inactive |
+| Efficiency    | Photon detection efficiency of detectors [0-1]                            | 1.       |
 
 The generation of 1,000 primary particles with a refractive index of 1.0 for the surrounding medium, with activating the scintillation for NaI scintillation (photon yeild = 38000 photons/MeV) is defined as follows:
 
@@ -222,7 +223,7 @@ Properties that need to be or can be set for `medium` and `converter` materials:
 
 | Material Property         | Mandatory/Optional | Unit          | Default      |
 | ------------------------- | ------------------ | ------------- | ------------ |
-| Refractive index          | Mandatory          | dimensionless | 1            |
+| Refractive index          | Mandatory          | dimensionless | 1.           |
 | Attenuation length        | Optional           | mm            | 0 (inactive) |
 | Scattering length         | Optional           | mm            | 0 (inactive) |
 

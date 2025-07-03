@@ -47,7 +47,7 @@ private:
   Gui *gui=nullptr;
   std::vector<Material*> mat;
   int nevt;
-  double index0, yield, delay, wlmin, wlmax,gmie;
+  double index0, yield, delay, wlmin, wlmax,gmie,eff;
   std::string sci_type;
   bool displaymode,act_scinti,act_cherenkov,usemie;
   std::array<int, 5> count;

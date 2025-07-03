@@ -12,6 +12,7 @@ Simulator::Simulator(std::mt19937& MT, Config config, std::string OUTPUT, Source
     wlmin(-99999),
     wlmax(-99999),
     gmie(-99999),
+    eff(1),
     sci_type(""),
     displaymode(false),
     act_scinti(false),
@@ -55,7 +56,13 @@ Simulator::Simulator(std::mt19937& MT, Config config, std::string OUTPUT, Source
   }
   else if(gmie!=-99999){
     std::cout<<"Asymmetry parameter in Mie scattering is "<<gmie<<std::endl;
-    std::cout<<"It must be between -1 and 1."<<gmie<<std::endl;
+    std::cout<<"It must be between -1 and 1."<<std::endl;
+    exit(1);
+  }
+  std::istringstream(config["Global"]["Efficiency"]) >> eff;
+  if(eff<0||eff>1){
+    std::cout<<"Photon detection efficiency is "<<eff<<std::endl;
+    std::cout<<"It must be between 0 and 1."<<std::endl;
     exit(1);
   }
   chg = new Charged(mt,mat);
@@ -365,7 +372,10 @@ int Simulator::FType(int bt){//Conver the temporary type ID to final type ID
   else if(bt==-4)return 1;//Exceed the limit of reflections
   else if(bt==-3)return 2;//Absorbed in normal medium.
   else if(bt==4)return 3; //Absorbed by absorber
-  else if(bt==5)return 4; //Detected by detector
+  else if(bt==5){//Absorbed by detector (considering photon detection efficiency)
+    if(unirand(mt)<eff)return 4;//Detected
+    else return 3;//Not detected
+  }
   else{
     std::cerr<<"Error in FType"<<std::endl;
     exit(1);
