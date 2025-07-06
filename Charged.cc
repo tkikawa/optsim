@@ -105,16 +105,6 @@ int Charged::NumPhoton(double d, double prob, bool is_scinti=true)
   std::poisson_distribution<int> poisson_dist(n_exp);
   return poisson_dist(mt);
 }
-
-double Charged::Distance(const Position& p1, const Position& p2)
-{
-    return std::sqrt(
-        std::pow(p1[0] - p2[0], 2) +
-        std::pow(p1[1] - p2[1], 2) +
-        std::pow(p1[2] - p2[2], 2)
-    );
-}
-
 Position Charged::Interpolate(const Position& p1, const Position& p2, double t) {
     return {
         p1[0] + t * (p2[0] - p1[0]),
@@ -247,7 +237,7 @@ void Charged::CalcSciPar(){
   else{//Calculate dE/dx following Berger-Seltzer formula.
     double tau = gamma - 1.0;
     double T = tau * me;
-    double F = 1.0 - beta2 + std::log(1.0 + pow(tau, 2) / 2.0); // F(tau): correction due to indistinguishability
+    double F = 1.0 - beta2 + std::log(1.0 + tau * tau / 2.0); // F(tau): correction due to indistinguishability
 
     // Density effect correction
     if (X < X0) {
@@ -269,7 +259,6 @@ double Charged::ScintiDelay(){
   else{
     int skip = mt() % 7 + 3;
     mt.discard(skip);
-    std::exponential_distribution<double> exp_dist(1.0 / scinti_lifetime);
-    return exp_dist(mt);
+    return exprand(mt)*scinti_lifetime;
   }
 }

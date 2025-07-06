@@ -104,3 +104,10 @@ void RandomPolarization(std::mt19937 mt, const Direction& v, Direction& p) {
   }
   Normalize(p);
 }
+double Distance(const Position& p1, const Position& p2)
+{
+  double dx = p1[0] - p2[0];
+  double dy = p1[1] - p2[1];
+  double dz = p1[2] - p2[2];
+  return std::sqrt(dx * dx + dy * dy + dz * dz);
+}

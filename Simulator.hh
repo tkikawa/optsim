@@ -41,6 +41,7 @@ private:
   void Mie(const Direction& v, const Direction& p, Direction& newv, Direction& newp);
   std::mt19937& mt;
   std::uniform_real_distribution<double> unirand;
+  std::exponential_distribution<double> exprand;
   std::string output;
   Source *src;
   Charged *chg;

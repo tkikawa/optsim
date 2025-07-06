@@ -24,7 +24,6 @@ public:
   void SetCherenkov(double WLMIN, double WLMAX);
     
 private:
-  double Distance(const Position& p1, const Position& p2);
   Position Interpolate(const Position& p1, const Position& p2, double t);
   void ScintiDir(Direction& vsci, Direction& psci);
   void CherenkovDir(double index, const Direction& vec, Direction& vche, Direction& pche);
@@ -34,6 +33,7 @@ private:
   double ScintiDelay();
   std::mt19937& mt;
   std::uniform_real_distribution<double> unirand;
+  std::exponential_distribution<double> exprand;
   std::vector<Material*> mat;
   std::vector<std::tuple<Position, Direction, Direction, double>> particle;
   double dedx,width_pp;

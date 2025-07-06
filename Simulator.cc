@@ -256,11 +256,11 @@ void Simulator::Run(){//Run simulation
 	  }//end of for
 	}//end of for
 	if(btype!=-2){
-	  pl=sqrt(pow(newpos[0]-pos[0],2)+pow(newpos[1]-pos[1],2)+pow(newpos[2]-pos[2],2));
+	  pl=Distance(newpos,pos);
 	  if(attlen>0||scatlen>0){//When attlen==0 (scatlen==0), absorption (scattering) in the medium does not occur.
-	    if(attlen>0)apl=-attlen*log(unirand(mt));
+	    if(attlen>0)apl=attlen*exprand(mt);
 	    else apl=DBL_MAX;
-	    if(scatlen>0)spl=-scatlen*log(unirand(mt));
+	    if(scatlen>0)spl=scatlen*exprand(mt);
 	    else spl=DBL_MAX;
 	    if(apl<pl || spl<pl){
 	      if(apl<spl){//Absorption in the medium
