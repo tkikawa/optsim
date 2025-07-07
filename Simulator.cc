@@ -221,40 +221,42 @@ void Simulator::Run(){//Run simulation
 	      continue;
 	    }
 	  }
-	  for(int t=0;t<mat[m]->NTriangle();t++){//loop for Triangles
-	    if(mat[m]->GetTriangle(t).Collision(pos,cross,cand)){//Check if a line between two points collides with the triangle or not
-	      for(int j=0;j<3;j++){
-		newpos[j]=cand[j];
-		if(matid==0){
-		  cross[j]=cand[j];
+	  if(matid==mat[m]->ID()||mat[m]->IntersectsAABB(pos, cross)){
+	    for(int t=0;t<mat[m]->NTriangle();t++){//loop for Triangles
+	      if(mat[m]->GetTriangle(t).Collision(pos,cross,cand)){//Check if a line between two points collides with the triangle or not
+		for(int j=0;j<3;j++){
+		  newpos[j]=cand[j];
+		  if(matid==0){
+		    cross[j]=cand[j];
+		  }
+		  else if(matid==mat[m]->ID()){
+		    cross[j]=cand[j]+vec[j]*micro;
+		  }
+		  else{
+		    cross[j]=cand[j]-vec[j]*micro;
+		  }
 		}
-		else if(matid==mat[m]->ID()){
-		  cross[j]=cand[j]+vec[j]*micro;
+		normal=mat[m]->GetTriangle(t).GetNormal();
+		if(matid==mat[m]->ID()){
+		  newmatid=0;
+		  newindex=index0;
+		  newattlen=0;
+		  newscatlen=0;
+		  btype=-1;
+		  newmn=-1;
 		}
 		else{
-		  cross[j]=cand[j]-vec[j]*micro;
+		  newmatid=mat[m]->ID();
+		  newindex=mat[m]->Index();
+		  newattlen=mat[m]->AttLen();
+		  newscatlen=mat[m]->ScatLen();
+		  btype=mat[m]->Type();
+		  newmn=m;
 		}
-	      }
-	      normal=mat[m]->GetTriangle(t).GetNormal();
-	      if(matid==mat[m]->ID()){
-		newmatid=0;
-		newindex=index0;
-		newattlen=0;
-		newscatlen=0;
-		btype=-1;
-		newmn=-1;
-	      }
-	      else{
-		newmatid=mat[m]->ID();
-		newindex=mat[m]->Index();
-		newattlen=mat[m]->AttLen();
-		newscatlen=mat[m]->ScatLen();
-		btype=mat[m]->Type();
-		newmn=m;
-	      }
-	    }//end of if
-	  }//end of for
-	}//end of for
+	      }//end of if(mat[m]->GetTriangle(t).Collision(pos,cross,cand))
+	    }//end of for(int t=0;t<mat[m]->NTriangle();t++)
+	  }//end of for(int t=0;t<mat[m]->NTriangle();t++)
+	}//end of if(matid==mat[m]->ID()||mat[m]->IntersectsAABB(pos, cross))
 	if(btype!=-2){
 	  pl=Distance(newpos,pos);
 	  if(attlen>0||scatlen>0){//When attlen==0 (scatlen==0), absorption (scattering) in the medium does not occur.

@@ -6,7 +6,7 @@ Material::Material(std::mt19937& MT, int ID, std::string MATFILE, std::string TY
     index(INDEX),
     attlen(ATTLEN),
     scatlen(SCATLEN),
-    is_scinti(false)
+    is_scinti(false)    
 {
   if(id<=0){
     std::cerr<<"Error: Matrial ID is invalid."<<std::endl;

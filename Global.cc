@@ -111,3 +111,7 @@ double Distance(const Position& p1, const Position& p2)
   double dz = p1[2] - p2[2];
   return std::sqrt(dx * dx + dy * dy + dz * dz);
 }
+void Compare(double &A_max, double &A_min, double A){//Update the minimum and maximum points of a coordinate
+  if(A_min > A) A_min = A;
+  if(A_max < A) A_max = A;
+}

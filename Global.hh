@@ -32,5 +32,6 @@ void RandomPolarization(std::mt19937 mt, const Direction& v, Direction& p);
 double Dot(const Direction& a, const Direction& b);
 void Cross(const Direction& a, const Direction& b, Direction& out);
 double Distance(const Position& p1, const Position& p2);
+void Compare(double &A_max, double &A_min, double A);
 
 #endif

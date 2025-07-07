@@ -96,6 +96,7 @@ int Charged::NumPhoton(double d, double prob, bool is_scinti=true)
     double mean_dE = d * dedx;
     double width = d * width_pp;
     double dE_sampled = rng.Landau(mean_dE, width);//Landau distribution
+    if (dE_sampled > 5.5 * mean_dE) dE_sampled = rng.Landau(mean_dE, width);
     if (dE_sampled < 0) dE_sampled = 0;
     n_exp = dE_sampled * yield;
   }

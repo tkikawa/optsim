@@ -20,13 +20,17 @@ Triangle::~Triangle()
 {
 }
 bool Triangle::Collision(const Position& s, const Position& t, Position& p){//Check if a line between two points crosses the triangle or not.
-  if((a*s[0]+b*s[1]+c*s[2]+d)*(a*t[0]+b*t[1]+c*t[2]+d)>=0)
-    return false;//Check if the two points are in difference sides of the triangle plane
-  double cp1,cp2,cp3;// Cross products
-  double k=-(a*s[0]+b*s[1]+c*s[2]+d)/(a*(t[0]-s[0])+b*(t[1]-s[1])+c*(t[2]-s[2]));
+  double ds = a*s[0] + b*s[1] + c*s[2] + d;
+  double dt = a*t[0] + b*t[1] + c*t[2] + d;
+  if (ds * dt >= 0.0) return false;//Check if the two points are in difference sides of the triangle plane
+  double denom = a*(t[0]-s[0])+b*(t[1]-s[1])+c*(t[2]-s[2]);
+  if (denom == 0.0) return false;// Line is parallel to plane
+  double k = -ds / denom;
   p[0]=t[0]*k+s[0]*(1-k);
   p[1]=t[1]*k+s[1]*(1-k);
   p[2]=t[2]*k+s[2]*(1-k);
+  double cp1,cp2,cp3;// Cross products
+  
   if(a!=0){
     cp1=(p[1]-vertex[0][1])*(vertex[1][2]-vertex[0][2])-(p[2]-vertex[0][2])*(vertex[1][1]-vertex[0][1]);
     cp2=(p[1]-vertex[1][1])*(vertex[2][2]-vertex[1][2])-(p[2]-vertex[1][2])*(vertex[2][1]-vertex[1][1]);

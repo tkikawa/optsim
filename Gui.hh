@@ -35,7 +35,6 @@ public:
   void UpdateDisplay();
   void DrawTrack(const Position& p0, const Position& p1, bool charged = false);
   void DrawLabel();
-  void Compare(double &A_max, double &A_min, double A);
   bool ComparePosition(const Position& p0, const Position& p1);
   bool Parallel(const Direction& p0, const Direction& p1);
   void DrawGeometry();

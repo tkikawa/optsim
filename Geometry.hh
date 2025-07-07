@@ -21,10 +21,13 @@ public:
   Triangle GetTriangle(int n){return triangle[n];}
   bool InSolid(const Position& pos);
   double Round(double p0);
+  bool IntersectsAABB(const Position& origin, const Position& end);
+  bool InAABB(const Position& pos);
   std::mt19937& mt;
   std::vector<Triangle> triangle;
   std::uniform_real_distribution<double> unirand;
   std::normal_distribution<double> gausrand;
+  Position box_max, box_min;
 };
 
 #endif

@@ -193,10 +193,6 @@ void Gui::DrawLabel(){
     }
   }
 }
-void Gui::Compare(double &A_max, double &A_min, double A){//Update the minimum and maximum points of a coordinate
-  if(A_min > A) A_min = A;
-  if(A_max < A) A_max = A;
-}
 bool Gui::ComparePosition(const Position& p0, const Position& p1){
     for (int i = 0; i < 3; ++i) {
         if (p0[i] != p1[i]) return p0[i] < p1[i];
@@ -218,9 +214,9 @@ void Gui::SetGeometry(){
         Position p2 = { sim->GetMaterial(m)->GetTriangle(t).X((j+1)%3), sim->GetMaterial(m)->GetTriangle(t).Y((j+1)%3), sim->GetMaterial(m)->GetTriangle(t).Z((j+1)%3) };
         if(ComparePosition(p1,p2))std::swap(p1, p2);
         edge_to_norm[{p1, p2}].push_back(sim->GetMaterial(m)->GetTriangle(t).GetNormal());
-        Compare(x_max, x_min, p1[0]);
-        Compare(y_max, y_min, p1[1]);
-        Compare(z_max, z_min, p1[2]);
+        ::Compare(x_max, x_min, p1[0]);
+        ::Compare(y_max, y_min, p1[1]);
+        ::Compare(z_max, z_min, p1[2]);
       }//end of for
     }//end of for
     for (auto it = edge_to_norm.begin(); it != edge_to_norm.end(); ++it) {
