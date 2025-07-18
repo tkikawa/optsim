@@ -80,7 +80,7 @@ Gui::Gui(const TGWindow *p, UInt_t w, UInt_t h, TApplication* APP)
   label[2]->SetTextColor(6);
   label[3]->SetTextColor(800);
   label[4]->SetTextColor(8);
-  label[5]->SetTextColor(7);
+  label[5]->SetTextColor(kCyan+2);
   label[6]->SetTextColor(4);
   label[7]->SetTextColor(28);
   for(int i=0;i<19;i++){
@@ -245,7 +245,7 @@ void Gui::DrawGeometry(){
     else if(type==1)l->SetLineColor(6);
     else if(type==2)l->SetLineColor(800);
     else if(type==3)l->SetLineColor(8);
-    else if(type==4)l->SetLineColor(7);
+    else if(type==4)l->SetLineColor(kCyan+2);
     else if(type==5)l->SetLineColor(4);
     else if(type>=6)l->SetLineColor(28);
     l->Draw();

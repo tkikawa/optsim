@@ -83,6 +83,7 @@ void Simulator::Run(){//Run simulation
   double index=1,newindex=1,attlen=0,newattlen=0,scatlen=0,newscatlen=0;
   int matid=0, newmatid=0, btype, mn, newmn;
   double pl,apl,spl;
+  bool converted=false;
   
   double ipos[3],fpos[3],ivec[3],fvec[3],ipol[3],fpol[3],time,length; //Branch variables for TTree *tree
   int imat, fmat, ftype, nref, npas, id;                              //Branch variables for TTree *tree
@@ -199,6 +200,7 @@ void Simulator::Run(){//Run simulation
       nref=0;
       npas=0;
       length=0;
+      converted=false;
       
       while(1){
 	btype = -2;
@@ -304,9 +306,10 @@ void Simulator::Run(){//Run simulation
 	      attlen=newattlen;
 	      scatlen=newscatlen;
 	      npas++;
-	      if(btype == 1){//Isotropic scattering for converter
+	      if(btype == 1 && !converted){//Isotropic scattering for converter
 		Isotropic(mt,newvec);
 		RandomPolarization(mt,newvec,newpol);
+		converted=true;
 	      }
 	    }
 	    else{
